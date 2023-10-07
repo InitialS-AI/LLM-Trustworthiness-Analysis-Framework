@@ -45,7 +45,7 @@ The `luna` folder contains all the essential APIs for model abstraction and metr
 
 To analyze your data, you first need to initialize the `MetricsAppEvalCollections` class. This class is responsible for collecting various metrics on your data based on abstract model representations:
 
-\```python
+```python
 eval_obj = MetricsAppEvalCollections(
     state_abstract_args_obj,
     prob_args_obj,
@@ -53,7 +53,7 @@ eval_obj = MetricsAppEvalCollections(
     val_instances,
     test_instances,
 )
-\```
+```
 
 Where:
 
@@ -67,21 +67,21 @@ Once the `MetricsAppEvalCollections` object is initialized, you can then collect
 
 - Evaluating the model:
 
-  \```python
+  ```python
   aucroc, accuracy, f1_score, _, _, abnormal_threshold = eval_obj.get_eval_result()
-  \```
+  ```
 
 - Calculating preciseness:
 
-  \```python
+  ```python
   preciseness = eval_obj.preciseness()
-  \```
+  ```
 
 - Calculating entropy:
 
-  \```python
+  ```python
   entropy = eval_obj.entropy()
-  \```
+  ```
 
 ... and many other metrics as shown in the `rq3` function.
 
