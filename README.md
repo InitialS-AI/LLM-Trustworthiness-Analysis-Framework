@@ -17,7 +17,7 @@ A comprehensive framework to construct abstract models for analyzing various tas
 1. Ensure you have Python 3.8+ installed.
 2. Clone this repository:
    ```bash
-   git clone <repository-link>
+   git clone https://github.com/dasong2296/LLM-LUNA.git
 3. Navigate to the project directory and set up a virtual environment:
    ```bash
    cd LUNA
