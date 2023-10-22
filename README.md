@@ -1,4 +1,4 @@
-# 🚀🦸 LUNA: A Model-based LLM-Oriented Universal Analysis Framework
+# 🚀🌙 LUNA: A Model-based LLM-Oriented Universal Analysis Framework
 
 A comprehensive framework to construct abstract models for analyzing various tasks. The current experiments are conducted on OOD Detection, Adversarial Attacks, and Hallucination.
 
@@ -17,7 +17,7 @@ A comprehensive framework to construct abstract models for analyzing various tas
 1. Ensure you have Python 3.8+ installed.
 2. Clone this repository:
    ```bash
-   git clone <repository-link>
+   git clone https://github.com/dasong2296/LLM-LUNA.git
 3. Navigate to the project directory and set up a virtual environment:
    ```bash
    cd LUNA
@@ -45,7 +45,7 @@ The `luna` folder contains all the essential APIs for model abstraction and metr
 
 To analyze your data, you first need to initialize the `MetricsAppEvalCollections` class. This class is responsible for collecting various metrics on your data based on abstract model representations:
 
-\```python
+```python
 eval_obj = MetricsAppEvalCollections(
     state_abstract_args_obj,
     prob_args_obj,
@@ -53,7 +53,7 @@ eval_obj = MetricsAppEvalCollections(
     val_instances,
     test_instances,
 )
-\```
+```
 
 Where:
 
@@ -67,21 +67,21 @@ Once the `MetricsAppEvalCollections` object is initialized, you can then collect
 
 - Evaluating the model:
 
-  \```python
+  ```python
   aucroc, accuracy, f1_score, _, _, abnormal_threshold = eval_obj.get_eval_result()
-  \```
+  ```
 
 - Calculating preciseness:
 
-  \```python
+  ```python
   preciseness = eval_obj.preciseness()
-  \```
+  ```
 
 - Calculating entropy:
 
-  \```python
+  ```python
   entropy = eval_obj.entropy()
-  \```
+  ```
 
 ... and many other metrics as shown in the `rq3` function.
 
