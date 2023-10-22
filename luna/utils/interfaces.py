@@ -11,7 +11,7 @@ class Grid(AbstractModel):
     Multiple DTMCs from a set of sets of traces
     traces: a set of sets of traces
     '''
-    def __init__(self, min_val, max_val, grid_num, clipped=True):
+    def __init__(self, min_val, max_val, grid_num, clipped=False):
         super().__init__()
         self.min = min_val
         self.max = max_val
@@ -37,8 +37,6 @@ class Grid(AbstractModel):
         tmp = ((con_states-self.min)/unit).astype(int)
         if self.clipped:
             tmp = np.clip(tmp, 0, self.k-1)
-        
-        tmp = tmp[np.newaxis, :]
         dims = tmp.shape[1]
         for i in range(dims):
             abs_states = abs_states + tmp[:,i]*pow(self.k, i)
