@@ -437,7 +437,7 @@ def main():
 
     HF_NAMES = {
         "llama_7B": "decapoda-research/llama-7b-hf",
-        "llama2_7B": "likenneth/honest_llama2_chat_7B",
+        "llama2_7B": "meta-llama/Llama-2-7b-hf",
         "alpaca_7B": "circulus/alpaca-7b",
         "vicuna_7B": "AlekseyKorshuk/vicuna-7b",
     }
@@ -446,16 +446,16 @@ def main():
     MODEL = HF_NAMES[model_name]
 
 
-    if args.model_name == "llama2_7B":
-        print("To Be Implemented...")
-        raise NotImplementedError("llama2_7B is not supported yet!")
-        # tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
-        # model = AutoModelForCausalLM.from_pretrained(MODEL, low_cpu_mem_usage = True, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto")
-    else:
-        tokenizer = LLaMATokenizer.from_pretrained(MODEL)
-        model = LLaMAForCausalLM.from_pretrained(
-            MODEL, low_cpu_mem_usage=True, torch_dtype=torch.float16, device_map="auto"
-        )
+    # if args.model_name == "llama2_7B":
+    #     print("To Be Implemented...")
+    #     raise NotImplementedError("llama2_7B is not supported yet!")
+    #     # tokenizer = AutoTokenizer.from_pretrained(MODEL, trust_remote_code=True)
+    #     # model = AutoModelForCausalLM.from_pretrained(MODEL, low_cpu_mem_usage = True, torch_dtype=torch.float16, trust_remote_code=True, device_map="auto")
+    # else:
+    tokenizer = LLaMATokenizer.from_pretrained(MODEL)
+    model = LLaMAForCausalLM.from_pretrained(
+        MODEL, low_cpu_mem_usage=True, torch_dtype=torch.float16, device_map="auto"
+    )
 
     device = args.device
     device = "cuda"

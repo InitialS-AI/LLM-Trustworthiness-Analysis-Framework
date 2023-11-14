@@ -1,4 +1,4 @@
-# 🚀🌙 LUNA: A Model-based LLM-Oriented Universal Analysis Framework
+# 🚀🦸 LUNA: A Model-based LLM-Oriented Universal Analysis Framework
 
 A comprehensive framework to construct abstract models for analyzing various tasks. The current experiments are conducted on OOD Detection, Adversarial Attacks, and Hallucination.
 
@@ -17,7 +17,7 @@ A comprehensive framework to construct abstract models for analyzing various tas
 1. Ensure you have Python 3.8+ installed.
 2. Clone this repository:
    ```bash
-   git clone https://github.com/dasong2296/LLM-LUNA.git
+   git clone <repository-link>
 3. Navigate to the project directory and set up a virtual environment:
    ```bash
    cd LUNA
@@ -45,7 +45,7 @@ The `luna` folder contains all the essential APIs for model abstraction and metr
 
 To analyze your data, you first need to initialize the `MetricsAppEvalCollections` class. This class is responsible for collecting various metrics on your data based on abstract model representations:
 
-```python
+\```python
 eval_obj = MetricsAppEvalCollections(
     state_abstract_args_obj,
     prob_args_obj,
@@ -53,7 +53,7 @@ eval_obj = MetricsAppEvalCollections(
     val_instances,
     test_instances,
 )
-```
+\```
 
 Where:
 
@@ -67,21 +67,21 @@ Once the `MetricsAppEvalCollections` object is initialized, you can then collect
 
 - Evaluating the model:
 
-  ```python
+  \```python
   aucroc, accuracy, f1_score, _, _, abnormal_threshold = eval_obj.get_eval_result()
-  ```
+  \```
 
 - Calculating preciseness:
 
-  ```python
+  \```python
   preciseness = eval_obj.preciseness()
-  ```
+  \```
 
 - Calculating entropy:
 
-  ```python
+  \```python
   entropy = eval_obj.entropy()
-  ```
+  \```
 
 ... and many other metrics as shown in the `rq3` function.
 
@@ -188,11 +188,174 @@ Metrics provide a quantitative measure to evaluate the performance and character
 
 ---
 
+### **Usage Overview**
+
+### Detailed Experiment Setup Example with LUNA Framework
+
+To demonstrate the practical application of the LUNA framework, here is a detailed example based on the provided Python script `RQ23-all-settings.py`.
+
+#### Step 1: Import Necessary Modules
+
+Start by importing the required modules from the LUNA framework and other dependencies.
+
+```python
+from luna.metrics_appeval_collection import MetricsAppEvalCollections
+import luna.data_loader as data_loader
+from types import SimpleNamespace
+import pandas as pd
+from itertools import product
+from collections import defaultdict
+import os
+from copy import deepcopy
+import numpy as np
+from scipy.stats import mannwhitneyu
+```
+
+#### Step 2: Set Experiment Parameters
+
+Configure the parameters for your experiment, including the language model, dataset, and various settings for abstraction and analysis.
+
+```python
+llm = "code_llama_7B_python"  # Language model
+dataset = "humaneval"         # Dataset
+info_type = "hidden_states"
+extract_block_idx = "31"
+abstraction_methods = ["Grid-based", "Cluster-based"]
+partition_nums = [5, 10, 15]
+abstraction_states = [200, 400, 600]
+# ... other configurations
+```
+
+#### Step 3: Initialize Results Storage
+
+Prepare a structure to store the results of your experiments.
+
+```python
+results = defaultdict(list)
+```
+
+#### Step 4: Running the Experiment
+
+Utilize the LUNA framework to run your experiment with the specified configurations. This involves processing the data, applying the abstraction methods, and collecting metrics.
+
+```python
+# Iterate through each abstraction method (Grid-based and Cluster-based)
+for abstraction_method in abstraction_methods:
+    # If Grid-based abstraction method is chosen
+    if abstraction_method == "Grid-based":
+        # Iterate through possible partition numbers for the grid-based method
+        for partition_num in partition_nums:
+            # Explore the impact of different PCA dimensions
+            for pca_dim in grid_pca_dims:
+                # Explore results for different probability models (DTMC and HMM)
+                for model_type in probability_models:
+                    # Explore different numbers of Grid history dependency
+                    for grid_history_dependency_num in grid_history_dependency:
+                        # If the model is Hidden Markov Model (HMM)
+                        if model_type == "HMM":
+                            # Iterate over different numbers of HMM components
+                            for hmm_n_comp in grid_hmm_n_comps:
+                                train_instances = deepcopy(train_instances_loaded)
+                                val_instances = deepcopy(val_instances_loaded)
+                                test_instances = deepcopy(test_instances_loaded)
+                                result, settings_str = run_experiment(
+                                    train_instances,
+                                    val_instances,
+                                    test_instances,
+                                    "Grid",
+                                    partition_num,
+                                    pca_dim,
+                                    model_type,
+                                    hmm_n_comp=hmm_n_comp,
+                                    grid_history_dependency_num=grid_history_dependency_num,
+                                )
+                                print("result", result)
+                                if result:
+                                    write_result_to_csv(result, settings_str)
+                               
+                        else:
+                            train_instances = deepcopy(train_instances_loaded)
+                            val_instances = deepcopy(val_instances_loaded)
+                            test_instances = deepcopy(test_instances_loaded)
+                            result, settings_str = run_experiment(
+                                train_instances,
+                                val_instances,
+                                test_instances,
+                                "Grid",
+                                partition_num,
+                                pca_dim,
+                                model_type,
+                                grid_history_dependency_num=grid_history_dependency_num,
+                            )
+                            if result:
+                                write_result_to_csv(result, settings_str)
+
+    # If Cluster-based abstraction method is chosen
+    elif abstraction_method == "Cluster-based":
+        # (similar logic as above for cluster-based experiments)
+        for abstraction_state, cluster_method in product(
+            abstraction_states, cluster_methods
+        ):
+            for pca_dim in pca_dims:
+                for model_type in probability_models:
+                    if model_type == "HMM":
+                        for hmm_n_comp in hmm_n_comps:
+                            train_instances = deepcopy(train_instances_loaded)
+                            val_instances = deepcopy(val_instances_loaded)
+                            test_instances = deepcopy(test_instances_loaded)
+                            result, settings_str = run_experiment(
+                                train_instances,
+                                val_instances,
+                                test_instances,
+                                cluster_method,
+                                abstraction_state,
+                                pca_dim,
+                                model_type,
+                                hmm_n_comp=hmm_n_comp,
+                            )
+                            if result:
+                                write_result_to_csv(result, settings_str)
+                    else:
+                        train_instances = deepcopy(train_instances_loaded)
+                        val_instances = deepcopy(val_instances_loaded)
+                        test_instances = deepcopy(test_instances_loaded)
+                        result, settings_str = run_experiment(
+                            train_instances,
+                            val_instances,
+                            test_instances,
+                            cluster_method,
+                            abstraction_state,
+                            pca_dim,
+                            model_type,
+                        )
+                        if result:
+                            write_result_to_csv(result, settings_str)
+
+```
+
+#### Step 5: Analyzing and Storing Results
+
+Finally, analyze the collected results and store them for further evaluation.
+
+```python
+# Example of analyzing results
+for metric, values in results.items():
+    print(f"Results for {metric}: {values}")
+
+# Storing results in a CSV file
+results_df = pd.DataFrame.from_dict(results)
+results_df.to_csv('experiment_results.csv', index=False)
+
+```
+
+This detailed example provides a clear guide on how to set up and run a comprehensive experiment using the LUNA framework, demonstrating its capability to handle complex configurations and analyses.
+
+---
 
 
 
 ## License
 
-[MIT](LICENSE)
+[FPA](LICENSE)
 
 ---

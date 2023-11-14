@@ -47,7 +47,8 @@ class RegularGrid(AbstractModel):
                 con_pattern = np.array([con_pattern])
                 abs_pattern = grid.state_abstract(con_pattern)[0]
                 abst_trace.append(abs_pattern)
-
+            if len(abst_trace) < 2:
+                abst_trace = [-1, -1]
             abst_traces.append(abst_trace)
 
         return abst_traces
@@ -68,12 +69,15 @@ class RegularGrid(AbstractModel):
         print(f"grid_num: {grid_num}")
 
         train_abst_traces = self.pca_to_abstract_traces(grid, train_set)
+        # train_abst_traces = [item for sublist in train_abst_traces for item in sublist]
         val_abst_traces = self.pca_to_abstract_traces(grid, val_set) if len(val_set) != 0 else []
+        # val_abst_traces = [item for sublist in val_abst_traces for item in sublist]
         test_abst_traces = self.pca_to_abstract_traces(grid, test_set)
+        # test_abst_traces = [item for sublist in test_abst_traces for item in sublist]
 
-        train_abst_traces = [item for sublist2d in train_abst_traces for sublist in sublist2d for item in sublist]
-        val_abst_traces = [item for sublist2d in val_abst_traces for sublist in sublist2d for item in sublist]
-        test_abst_traces = [item for sublist2d in test_abst_traces for sublist in sublist2d for item in sublist]
+        # train_abst_traces = [item for sublist2d in train_abst_traces for sublist in sublist2d for item in sublist]
+        # val_abst_traces = [item for sublist2d in val_abst_traces for sublist in sublist2d for item in sublist]
+        # test_abst_traces = [item for sublist2d in test_abst_traces for sublist in sublist2d for item in sublist]
 
         return train_abst_traces, val_abst_traces, test_abst_traces
        

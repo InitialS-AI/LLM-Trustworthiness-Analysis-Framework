@@ -12,22 +12,22 @@ from scipy.stats import mannwhitneyu
 
 # Experiment settings
 dataset = "advglue++"
-info_type = "attention_heads"
+info_type = "hidden_states"
 extract_block_idx = "31"
-abstraction_methods = ["Grid-based", "Cluster-based"]
+abstraction_methods = ["Grid-based"]
 partition_nums = [5, 10, 15]
 abstraction_states = [200, 400, 600]
 cluster_methods = ["GMM", "KMeans"]
-pca_dims = [512, 1024, 2048]
-probability_models = ["HMM", "DTMC"]
+pca_dims = [3, 5, 10]
+probability_models = ["HMM"]
 hmm_n_comps = [100, 200, 400]
 grid_history_dependency = [1, 2, 3]
-grid_hmm_n_comps = [10, 20, 40]
+grid_hmm_n_comps = [100, 200, 400]
 
 # Initialize dictionary to store results for each metric
 results = defaultdict(list)
 
-def write_result_to_csv(result, settings_str, path="eval/{}/attention_heads/{}/rq23_all_settings_{}.csv".format(
+def write_result_to_csv(result, settings_str, path="eval/{}/{}/grid_rq23_all_settings_{}.csv".format(
     dataset, extract_block_idx, info_type
 )):
     result["settings"] = settings_str  # Add settings to the result
@@ -215,7 +215,7 @@ def run_experiment(
         "extract_block_idx": extract_block_idx,
         "info_type": info_type,
         "is_attack_success": 1,
-        "iter_num": 1000,
+        "iter_num": 100,
         "cluster_method": abstraction_method,
         "abstract_state": abstract_state_num,
         "pca_dim": pca_dim,

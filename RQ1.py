@@ -120,13 +120,13 @@ def load_data(state_abstract_args):
     return train_instances, val_instances, test_instances
 
 datasets = {
+    "advglue++": "Grid_10_3_DTMC_0_1",
+    "sst2": "GMM_200_1024_DTMC_0_0",
     "truthful_qa": "GMM_400_1024_DTMC_0_0", 
-    "sst2": "Grid_15_2048_DTMC_0_1", 
-    "advglue++": "GMM_400_2048_DTMC_0_0",
 }
 info_type = "hidden_states"
-fig_kde, axs_kde = plt.subplots(1, 3, figsize=(18, 6))  # one row, three columns for KDE plots
-fig_kl, axs_kl = plt.subplots(1, 3, figsize=(18, 6))  # one row, three columns for KL Divergence plots
+fig_kde, axs_kde = plt.subplots(1, 3, figsize=(12, 3))  # one row, three columns for KDE plots
+fig_kl, axs_kl = plt.subplots(1, 3, figsize=(12, 3))  # one row, three columns for KL Divergence plots
 
 idx = 0
 result = {}
@@ -203,10 +203,11 @@ for dataset, optimal_setting in datasets.items():
     axs_kde[idx].set_title(f'{dataset_perspective_dict[dataset]}', fontsize=16)
     # axs_kde[idx].set_xlabel('Index', fontsize=14)
     # axs_kde[idx].grid(True, linestyle='--', linewidth=0.5, color='gray')
+    axs_kde[idx].set_xticks([]) 
     axs_kde[idx].set_xlim([0, None])
     if idx == 0:
-        axs_kde[idx].set_ylabel('Density', fontsize=14)
-        axs_kde[idx].legend(loc='upper left', fontsize=12)
+        axs_kde[idx].set_ylabel('Density', fontsize='x-small')
+        axs_kde[idx].legend(loc='upper left', fontsize='x-small')
     else:
         axs_kde[idx].set_ylabel('')
         axs_kde[idx].legend().remove()
