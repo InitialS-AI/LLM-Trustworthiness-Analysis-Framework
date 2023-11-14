@@ -1,4 +1,4 @@
-from luna.metrics import Metrics
+from luna.metrics_appeval_collection import MetricsAppEvalCollections as Metrics
 import luna.data_loader as data_loader
 
 from types import SimpleNamespace
