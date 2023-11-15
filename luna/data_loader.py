@@ -26,6 +26,16 @@ class TqaDataLoader(DataLoader):
             if f.endswith(".joblib") and f.__contains__(self.llm_name)
         ]
         return file_list[0]
+    
+    def classify_loop(self, qa_string):
+        first_a_index = qa_string.find("A: ")
+        is_loop_generated = 0
+        if first_a_index != -1:
+            answer = qa_string[first_a_index:].strip()
+            q_count = answer.count("Q:")
+            is_loop_generated = 1 if q_count > 1 else 0
+            
+        return is_loop_generated
 
     def load_hidden_states(self):
         all_instances = []
@@ -47,6 +57,7 @@ class TqaDataLoader(DataLoader):
                         "truth_prob": data["truth_prob"],
                         "hidden_states": hidden_states,
                         "binary_label": binary_label,
+                        "is_loop_generated": self.classify_loop(data["A"]),
                         "question": data["Q"],
                         "original_data_record": data["original_data_record"],
                         "answer": data["A"],
@@ -117,6 +128,13 @@ class AdvDataLoader(DataLoader):
         super().__init__(dataset_path, llm_name)
         self.is_attack_success = is_attack_success
 
+    def classify_sentiment_output(self, output_string):
+        lines = output_string.strip().split("\n")
+        if len(lines) == 2:
+            return 1
+        else:
+            return 0
+
     def load_data(self):
         # Get a list of all joblib files in the specified directory
         file_list = [
@@ -176,7 +194,8 @@ class AdvDataLoader(DataLoader):
                             "binary_label": data["label"],
                             "output": data["output"],
                             "input": data["input"],
-                            "is_adversarial": data["is_adversarial"],
+                            "is_original": 0 if data["is_adversarial"] == 1 else 1,
+                            "is_loop_generated": self.classify_sentiment_output(data["output"]),
                             "hidden_states_block_id": data["hidden_states_block_id"],
                             "adv_dataset": file_name.split("_")[-1],
                             "adv_method": data["original_data_record"]["method"]
@@ -241,7 +260,7 @@ class AdvDataLoader(DataLoader):
                             "binary_label": data["label"],
                             "output": data["output"],
                             "input": data["input"],
-                            "is_adversarial": data["is_adversarial"],
+                            "is_original": 0 if data["is_adversarial"] == 1 else 1,
                             "attention_block_id": data["hidden_states_block_id"],
                             "adv_dataset": file_name.split("_")[-1],
                             "adv_method": data["original_data_record"]["method"]
@@ -274,6 +293,13 @@ class AdvDataLoader(DataLoader):
 
 
 class OodDataLoader(DataLoader):
+    def classify_sentiment_output(self, output_string):
+        lines = output_string.strip().split("\n")
+        if len(lines) == 2:
+            return 1
+        else:
+            return 0
+        
     def load_hidden_states(self):
         # Get a list of all joblib files in the specified directory
         file_list = [
@@ -285,8 +311,6 @@ class OodDataLoader(DataLoader):
         # Initialize lists to store the data
         all_train_instances = []
         test_instance = []
-
-        print(file_list)
 
         # Loop through the file list
         for file in file_list:
@@ -304,7 +328,8 @@ class OodDataLoader(DataLoader):
                             "id": id,
                             "hidden_states": data["hidden_states"],
                             "binary_label": data["label"],
-                            "is_ood": data["is_ood"],
+                            "is_id": 0 if data["is_ood"] == 1 else 1,
+                            "is_loop_generated": self.classify_sentiment_output(data["output"]),
                             "ood_method": file_name,
                             "probs": data["probs"],
                             "loss": data["loss"],
@@ -360,7 +385,7 @@ class OodDataLoader(DataLoader):
                             if head_or_block == 0
                             else data["step_by_step_attention_blocks"],
                             "binary_label": data["label"],
-                            "is_ood": data["is_ood"],
+                            "is_id": 0 if data["is_ood"] == 1 else 1,
                             "ood_method": file_name,
                             "output": data["output"],
                             "input": data["input"],
@@ -386,3 +411,93 @@ class OodDataLoader(DataLoader):
             val_instances,
             test_instance,
         )
+
+class CodeLoader(DataLoader):
+    def load_data(self):
+        # Get a list of all joblib files in the specified directory
+        file_list = [
+            f
+            for f in os.listdir(self.dataset_path)
+            if f.endswith(".joblib") and f.__contains__(self.llm_name)
+        ]
+
+        print(self.llm_name, self.dataset_path)
+        return file_list[0]
+
+    def load_hidden_states(self):
+        all_instances = []
+        file_path = "{}/{}".format(self.dataset_path, self.load_data())
+        print("File path: {}".format(file_path))
+        print("Loading hidden states...")
+        with open(file_path, "rb") as f:
+            pbar = tqdm(total=None, desc="Loading hidden states")
+            id = 0
+            while True:
+                try:
+                    pbar.update(1)
+                    data = load(f)
+                    # ========= 1. Get the binary label =========
+                    # ========= 2. Get the hidden states =========
+                    hidden_states = data["hidden_states"]
+                    instance_hidden_states = {
+                        "id": id,
+                        "hidden_states": hidden_states,
+                        "input": data["input"],
+                        "original_data_record": data["original_data_record"],
+                        "output": data["output"],
+                        "pass@1": data["code_output"]["pass@1"],
+                    }
+                    id += 1
+
+                    all_instances.append(instance_hidden_states)
+
+                except EOFError:
+                    break
+
+        train_instances, test_instances = train_test_split(
+            all_instances, test_size=0.2, random_state=42
+        )
+
+        train_instances, val_instances = train_test_split(
+            train_instances, test_size=0.2, random_state=42
+        )
+
+        return train_instances, val_instances, test_instances
+
+    def load_attentions(self, head_or_block):  # 0 is head, 1 is block
+        all_train_instances = []
+        test_instances = []
+
+        file_path = "{}/{}".format(self.dataset_path, self.load_data())
+        print("Loading attentions...")
+        with open(file_path, "rb") as f:
+            pbar = tqdm(total=None, desc="Loading attention")
+            id = 0
+            while True:
+                try:
+                    pbar.update(1)
+                    data = load(f)
+                    # ========= 1. Get the binary label =========
+                    # ========= 2. Get the attention =========
+                    instance = {
+                        "id": id,
+                        "input": data["Input"],
+                        "output": data["Output"],
+                        "attention": data["step_by_step_attention_heads"]
+                        if head_or_block == 0
+                        else data["step_by_step_attention_blocks"],
+                        "original_data_record": data["original_data_record"],
+                    }
+                    id += 1
+                    if data["binary_label"] == 0:
+                        test_instances.append(instance)
+                    else:
+                        all_train_instances.append(instance)
+                except EOFError:
+                    break
+
+        train_instances, val_instances = train_test_split(
+            all_train_instances, test_size=0.2, random_state=42
+        )
+
+        return train_instances, val_instances, test_instances

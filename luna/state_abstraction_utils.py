@@ -440,6 +440,7 @@ class AbstractStateExtraction:
             instance["step_by_step_attention_blocks"] = None
 
         return train_instances, val_instances, test_instance
+
     def main(self, train_instances, val_instances, test_instances):
         """
         Main processing method to generate traces for given instances based on configurations.
@@ -466,6 +467,7 @@ class AbstractStateExtraction:
         args = self.args
         llm_name = args.llm_name
         result_save_path = args.result_save_path
+        result_eval_path = args.result_eval_path
         dataset = args.dataset
         info_type = args.info_type
         extract_block_idx_str = args.extract_block_idx
@@ -476,11 +478,21 @@ class AbstractStateExtraction:
         is_attack_success = args.is_attack_success
         grid_history_dependency_num = args.grid_history_dependency_num
 
-        if train_instances and val_instances and test_instances:
-            eval_folder_path = "eval/{}/{}".format(dataset, extract_block_idx_str)
-            if not os.path.exists(eval_folder_path):
-                os.makedirs(eval_folder_path)
+        # set the dataset folder path
+        dataset_folder_path = "{}/{}/{}".format(
+            result_save_path, dataset, extract_block_idx_str
+        )
+        if not os.path.exists(dataset_folder_path):
+            os.makedirs(dataset_folder_path)
 
+        eval_folder_path = "{}/{}/{}".format(
+            result_eval_path, dataset, extract_block_idx_str
+        )
+        if not os.path.exists(eval_folder_path):
+            os.makedirs(eval_folder_path)
+
+
+        if train_instances and val_instances and test_instances:
             if info_type == "hidden_states":
                 (
                     train_instances_with_traces,
@@ -513,16 +525,6 @@ class AbstractStateExtraction:
                 raise NotImplementedError("Unknown info type!")
 
         else:
-            dataset_folder_path = "{}/{}/{}".format(
-                result_save_path, dataset, extract_block_idx_str
-            )
-            if not os.path.exists(dataset_folder_path):
-                os.makedirs(dataset_folder_path)
-
-            eval_folder_path = "eval/{}/{}".format(dataset, extract_block_idx_str)
-            if not os.path.exists(eval_folder_path):
-                os.makedirs(eval_folder_path)
-
             loader = None
             if dataset == "truthful_qa":
                 loader = data_loader.TqaDataLoader(dataset_folder_path, llm_name)
@@ -534,6 +536,9 @@ class AbstractStateExtraction:
 
             elif dataset == "sst2":
                 loader = data_loader.OodDataLoader(dataset_folder_path, llm_name)
+
+            elif dataset == "humaneval" or dataset == "mbpp":
+                loader = data_loader.CodeLoader(dataset_folder_path, llm_name)
 
             else:
                 raise NotImplementedError("Unknown dataset!")
@@ -594,7 +599,7 @@ class AbstractStateExtraction:
                 )
             else:
                 raise NotImplementedError("Unknown info type!")
-
+        
         if dataset == "advglue++":
             if cluster_method == "Grid":
                 save_lists_path = "{}/{}_{}_{}_{}_{}_{}_{}.pkl".format(

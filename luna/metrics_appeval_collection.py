@@ -25,10 +25,13 @@ class MetricsAppEvalCollections:
         val_instances=None,
         test_instances=None,
     ):
+        result_eval_path = "{}/eval/{}".format(abs_args.result_save_path, abs_args.llm_name) 
+        abs_args.result_eval_path = result_eval_path
         self.abstractStateExtraction = AbstractStateExtraction(
             abs_args, train_instances, val_instances, test_instances
         )
         self.dataset = prob_args.dataset
+        
         self.dtmc_model = DtmcModel(
             prob_args.dataset,
             prob_args.extract_block_idx,
@@ -39,12 +42,20 @@ class MetricsAppEvalCollections:
             prob_args.test_ratio,
             prob_args.is_attack_success,
             prob_args.grid_history_dependency_num,
+            result_eval_path
         )
-        (
-            self.dtmc_transition_aucroc,
-            self.dtmc_transition_fpr,
-            self.dtmc_transition_tpr,
-        ) = self.dtmc_model.get_aucroc_by_transition_binding()
+        if self.dataset == "truthful_qa":
+            (
+                self.dtmc_state_aucroc,
+                self.dtmc_state_fpr,
+                self.dtmc_state_tpr,
+            ) = self.dtmc_model.get_aucroc_by_state_binding()
+        else:
+            (
+                self.dtmc_transition_aucroc,
+                self.dtmc_transition_fpr,
+                self.dtmc_transition_tpr,
+            ) = self.dtmc_model.get_aucroc_by_transition_binding()
 
         if prob_args.model_type == "DTMC":
             self.prob_model = self.dtmc_model
@@ -56,7 +67,7 @@ class MetricsAppEvalCollections:
             for i, one_trace in enumerate(self.train_abstract_traces):
                 train_data_points[i]["step_by_step_analyzed_trace"] = one_trace
                 train_data_points[i]["label"] = self.dtmc_model.train_groundtruths[i]
-            self.state_failure_prob_map = self.dtmc_model.construct_dtmc_state_model(
+            self.state_positive_prob_map = self.dtmc_model.construct_dtmc_state_model(
                 train_data_points
             )
 
@@ -73,6 +84,7 @@ class MetricsAppEvalCollections:
                 prob_args.iter_num,
                 prob_args.is_attack_success,
                 prob_args.grid_history_dependency_num,
+                result_eval_path
             )
             (
                 self.hmm_transition_aucroc,
@@ -97,7 +109,7 @@ class MetricsAppEvalCollections:
             for i, one_trace in enumerate(self.train_abstract_traces):
                 train_data_points[i]["step_by_step_analyzed_trace"] = one_trace
                 train_data_points[i]["label"] = self.hmm_model.train_groundtruths[i]
-            self.state_failure_prob_map = self.hmm_model.construct_hmmstate_state_model(
+            self.state_positive_prob_map = self.hmm_model.construct_hmmstate_state_model(
                 train_data_points
             )
         else:
@@ -132,14 +144,14 @@ class MetricsAppEvalCollections:
                 selected_val_groundtruths + selected_test_groundtruths
             )
 
-            selected_abnormal_transition_failure_score_map = (
+            selected_abnormal_transition_positive_score_map = (
                 self.prob_model.get_sentence_scores_by_transition_binding(
                     selected_threshold_traces, selected_threshold_groundtruths
                 )
             )
 
             abnormal_y_pred, _ = self.prob_model.compose_scores_with_groundtruths_pair(
-                selected_abnormal_transition_failure_score_map
+                selected_abnormal_transition_positive_score_map
             )
 
             abnormal_threshold = statistics.median(abnormal_y_pred)
@@ -158,15 +170,15 @@ class MetricsAppEvalCollections:
         self.val_test_groundtruths = val_test_groundtruths
 
         if self.dataset == "truthful_qa":
-            sentence_failure_score_map = (
+            sentence_positive_score_map = (
                 self.prob_model.get_sentence_scores_by_state_binding(
                     self.test_abstract_traces,
-                    self.state_failure_prob_map,
+                    self.state_positive_prob_map,
                     self.prob_model.test_groundtruths,
                 )
             )
         else:
-            sentence_failure_score_map = (
+            sentence_positive_score_map = (
                 self.prob_model.get_sentence_scores_by_transition_binding(
                     val_test_traces, val_test_groundtruths
                 )
@@ -174,7 +186,7 @@ class MetricsAppEvalCollections:
 
         ###################### prediction ##############################
         y_pred, y_groundtruth = self.prob_model.compose_scores_with_groundtruths_pair(
-            sentence_failure_score_map
+            sentence_positive_score_map
         )
         if self.dataset == "truthful_qa":
             y_prep_binary = [0 if x < abnormal_threshold else 1 for x in y_pred]

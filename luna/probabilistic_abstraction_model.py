@@ -18,6 +18,7 @@ class ProbabilisticModel:
         test_ratio,
         is_attack_success,
         grid_history_dependency_num,
+        result_eval_path,
     ):
         """
         Initialize the ProbabilisticModel class.
@@ -46,9 +47,21 @@ class ProbabilisticModel:
             - It constructs the path to the evaluation folder based on the dataset and other parameters.
             - The method also analyzes the length distribution of state traces in the training, validation, and test sets.
         """
+
+        groundtruths_key_dataset_map = {
+            # "truthful_qa": "is_loop_generated",
+            # "sst2": "is_loop_generated",
+            # "advglue++": "is_loop_generated",
+            "truthful_qa": "binary_label",
+            "sst2": "is_id",
+            "advglue++": "is_original",
+            "humaneval": "pass@1",
+            "mbpp": "pass@1",
+        }
+
         if dataset == "advglue++":
             if cluster_method == "Grid":
-                eval_folder_path = "eval/{}/{}/{}_{}_{}_{}_{}_{}_{}.pkl".format(
+                eval_folder_path = "{}/{}/{}_{}_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     info_type,
@@ -60,7 +73,7 @@ class ProbabilisticModel:
                     grid_history_dependency_num,
                 )
             else:
-                eval_folder_path = "eval/{}/{}/{}_{}_{}_{}_{}_{}.pkl".format(
+                eval_folder_path = "{}/{}/{}_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     info_type,
@@ -72,7 +85,7 @@ class ProbabilisticModel:
                 )
         else:
             if cluster_method == "Grid":
-                eval_folder_path = "eval/{}/{}/{}_{}_{}_{}_{}_{}.pkl".format(
+                eval_folder_path = "{}/{}/{}_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     info_type,
@@ -83,7 +96,7 @@ class ProbabilisticModel:
                     grid_history_dependency_num,
                 )
             else:
-                eval_folder_path = "eval/{}/{}/{}_{}_{}_{}_{}.pkl".format(
+                eval_folder_path = "{}/{}/{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     info_type,
@@ -92,6 +105,7 @@ class ProbabilisticModel:
                     pca_dim,
                     test_ratio,
                 )
+        eval_folder_path = result_eval_path + "/" + eval_folder_path
         self.eval_folder_path = eval_folder_path
         self.train_instances, self.val_instances, self.test_instances = load_lists(
             eval_folder_path
@@ -117,13 +131,8 @@ class ProbabilisticModel:
             for i in range(5):
                 print(self.test_traces[i], self.test_instances[i]["output"])
 
-
-        if dataset == "truthful_qa":
-            key = "binary_label"
-        elif dataset == "sst2":
-            key = "is_ood"
-        elif dataset == "advglue++":
-            key = "is_adversarial"
+        if dataset in groundtruths_key_dataset_map:
+            key = groundtruths_key_dataset_map[dataset]
         else:
             print("illegal dataset")
             exit(1)
@@ -485,8 +494,8 @@ class ProbabilisticModel:
         """
         y_pred = []
         y_groundtruth = []
-        for label, failure_score_list in sentence_score_map:
-            if len(failure_score_list) == 0:
+        for label, positive_score_list in sentence_score_map:
+            if len(positive_score_list) == 0:
                 continue
 
             if label == 1:
@@ -494,24 +503,24 @@ class ProbabilisticModel:
             else:
                 y_groundtruth.append(0)
 
-            if len(failure_score_list) == 0:
+            if len(positive_score_list) == 0:
                 y_pred.append(1)
                 continue
             else:
                 if statistic_type == "mean":
-                    pred_score = np.mean(failure_score_list)
+                    pred_score = np.mean(positive_score_list)
                     y_pred.append(pred_score)
                 elif statistic_type == "sum":
-                    pred_score = np.sum(failure_score_list)
+                    pred_score = np.sum(positive_score_list)
                     y_pred.append(pred_score)
                 elif statistic_type == "median":
-                    pred_score = np.median(failure_score_list)
+                    pred_score = np.median(positive_score_list)
                     y_pred.append(pred_score)
                 elif statistic_type == "max":
-                    pred_score = np.max(failure_score_list)
+                    pred_score = np.max(positive_score_list)
                     y_pred.append(pred_score)
                 elif statistic_type == "min":
-                    pred_score = np.min(failure_score_list)
+                    pred_score = np.min(positive_score_list)
                     y_pred.append(pred_score)
                 else:
                     print("illeague statistic_type")
@@ -543,7 +552,6 @@ class ProbabilisticModel:
         Notes:
             - The method uses the `compose_scores_with_groundtruths_pair` to obtain predicted scores and ground truths.
             - It then uses the `roc_curve` method from the metrics module to calculate FPR and TPR.
-            - If the AUC-ROC value is less than 0.5, it is adjusted to 1 - AUC-ROC to ensure a value between 0.5 and 1.
             - The method also evaluates the TPR at specific FPR values (like 1e-1, 1e-2, etc.) using interpolation.
         """
         y_pred = []
@@ -563,11 +571,6 @@ class ProbabilisticModel:
 
         fpr, tpr, thresholds = metrics.roc_curve(y_groundtruth, y_pred)
         aucroc = metrics.auc(fpr, tpr)
-        if aucroc < 0.5:
-            aucroc = 1 - aucroc
-            tmp = fpr
-            fpr = tpr
-            tpr = tmp
 
         roc_func = interpolate.interp1d(fpr, tpr)
         tpr_at_fpr_set_dist = {
@@ -596,7 +599,8 @@ class HmmModel(ProbabilisticModel):
         hmm_components_num,
         iter_num,
         is_attack_success,
-        grid_history_dependency_num
+        grid_history_dependency_num,
+        result_eval_path,
     ):
         """
         Initialize the HmmModel class.
@@ -632,12 +636,13 @@ class HmmModel(ProbabilisticModel):
             pca_dim,
             test_ratio,
             is_attack_success,
-            grid_history_dependency_num
+            grid_history_dependency_num,
+            result_eval_path,
         )
 
         if dataset == "advglue++":
             if cluster_method == "Grid":
-                hmm_folder_path = "eval/{}/{}/hmm/hmm_{}_components_{}_{}_{}_{}_{}_{}_{}.pkl".format(
+                hmm_path = "hmm_{}_components_{}_{}_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     hmm_components_num,
@@ -650,7 +655,7 @@ class HmmModel(ProbabilisticModel):
                     grid_history_dependency_num,
                 )
             else:
-                hmm_folder_path = "eval/{}/{}/hmm/hmm_{}_components_{}_{}_{}_{}_{}_{}.pkl".format(
+                hmm_path = "hmm_{}_components_{}_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     hmm_components_num,
@@ -663,7 +668,7 @@ class HmmModel(ProbabilisticModel):
                 )
         else:
             if cluster_method == "Grid":
-                hmm_folder_path = "eval/{}/{}/hmm/hmm_{}_components_{}_{}_{}_{}_{}_{}.pkl".format(
+                hmm_path = "hmm_{}_components_{}_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     hmm_components_num,
@@ -675,7 +680,7 @@ class HmmModel(ProbabilisticModel):
                     grid_history_dependency_num,
                 )
             else:
-                hmm_folder_path = "eval/{}/{}/hmm/hmm_{}_components_{}_{}_{}_{}_{}.pkl".format(
+                hmm_path = "hmm_{}_components_{}_{}_{}_{}_{}.pkl".format(
                     dataset,
                     extract_block_idx,
                     hmm_components_num,
@@ -685,7 +690,13 @@ class HmmModel(ProbabilisticModel):
                     pca_dim,
                     test_ratio,
                 )
-        self.hmm_folder_path = hmm_folder_path
+        hmm_folder_path = "{}/{}/{}/hmm".format(
+            result_eval_path, dataset, extract_block_idx
+        )
+        if not os.path.exists(hmm_folder_path):
+            os.makedirs(hmm_folder_path)
+        hmm_files_path = hmm_folder_path + "/" + hmm_path
+        self.hmm_files_path = hmm_files_path
         self.hmm_components_num = hmm_components_num
         self.iter_num = iter_num
 
@@ -802,21 +813,21 @@ class HmmModel(ProbabilisticModel):
 
     def construct_hmmstate_state_model(self, data_points):
         """
-        Construct a model mapping HMM states to failure probabilities based on data points.
+        Construct a model mapping HMM states to positive probabilities based on data points.
         
-        This method computes the failure probabilities for each HMM state using the provided data points. 
-        It determines the frequency of positive and negative labels for each state and calculates the state's failure probability.
+        This method computes the positive probabilities for each HMM state using the provided data points. 
+        It determines the frequency of positive and negative labels for each state and calculates the state's positive probability.
         
         Parameters:
             data_points (list): A list of data points, where each point contains "step_by_step_analyzed_trace" and "label".
             
         Returns:
-            dict: A dictionary mapping each HMM state to its failure probability.
+            dict: A dictionary mapping each HMM state to its positive probability.
             
         Notes:
             - The method constructs a statistics map by iterating over the HMM state traces of each data point.
             - It uses the `decode` method of the trained HMM model to obtain HMM state traces from analyzed traces.
-            - The resulting statistics map is then used to calculate the failure probability for each state.
+            - The resulting statistics map is then used to calculate the positive probability for each state.
         """
         state_posterior_statics = {}
 
@@ -842,20 +853,20 @@ class HmmModel(ProbabilisticModel):
         num_of_hmmstates = len(state_posterior_statics)
         print("num_of_hmmstate = {}".format(num_of_hmmstates))
 
-        state_failure_prob_map = {}
+        state_positive_prob_map = {}
         for state in state_posterior_statics:
-            state_failure_prob_map[state] = state_posterior_statics[state]["neg"] / (
+            state_positive_prob_map[state] = state_posterior_statics[state]["pos"] / (
                 state_posterior_statics[state]["neg"]
                 + state_posterior_statics[state]["pos"]
                 + 1e-20
             )
 
-        return state_failure_prob_map
+        return state_positive_prob_map
 
     def get_sentence_scores_by_state_binding(
-        self, traces, state_failure_prob_map, groundtruths
+        self, traces, state_positive_prob_map, groundtruths
     ):
-        sentence_failure_score_map = []
+        sentence_positive_score_map = []
         for i, trace in enumerate(traces):
             label = groundtruths[i]
             hmmstate_trace = self.hmm_model.decode([[x] for x in trace])[1].tolist()
@@ -863,8 +874,8 @@ class HmmModel(ProbabilisticModel):
 
             for i, hmmstate in enumerate(hmmstate_trace):
                 print(hmmstate)
-                if hmmstate in state_failure_prob_map:
-                    state_sentence_scores.append(state_failure_prob_map[hmmstate])
+                if hmmstate in state_positive_prob_map:
+                    state_sentence_scores.append(state_positive_prob_map[hmmstate])
                 else:
                     state_sentence_scores.append(0)
 
@@ -875,8 +886,8 @@ class HmmModel(ProbabilisticModel):
                 -np.log(x) if x > 0 else 0 for x in state_sentence_scores
             ]
 
-            sentence_failure_score_map.append((label, state_sentence_scores))
-        return sentence_failure_score_map
+            sentence_positive_score_map.append((label, state_sentence_scores))
+        return sentence_positive_score_map
 
     def get_sentence_scores_by_transition_binding(
         self, sentence_traces, groundtruths
@@ -905,7 +916,6 @@ class HmmModel(ProbabilisticModel):
                         one_set_score_list.append(score)
                     else:
                         one_set_score_list.append(0.0)
-            # one_set_score_list = [-np.log(x) if x > 0 else 0 for x in one_set_score_list]
             one_set_score_list = [x if x > 0 else 0 for x in one_set_score_list]
             sentence_scores.append((groundtruths[i], one_set_score_list))
         return sentence_scores
@@ -929,9 +939,9 @@ class HmmModel(ProbabilisticModel):
             val_data_points[i]["label"] = self.val_groundtruths[i]
         
         
-        if os.path.exists(self.hmm_folder_path):
-            print("load hmm model from {}".format(self.hmm_folder_path))
-            with open(self.hmm_folder_path, "rb") as f:
+        if os.path.exists(self.hmm_files_path):
+            print("load hmm model from {}".format(self.hmm_files_path))
+            with open(self.hmm_files_path, "rb") as f:
                 self.hmm_model = pickle.load(f)
         else:
             print("start to train hmm model...")
@@ -941,11 +951,11 @@ class HmmModel(ProbabilisticModel):
                 n_iter=self.iter_num,
             )
 
-            with open(self.hmm_folder_path, "wb") as fw:
+            with open(self.hmm_files_path, "wb") as fw:
                 pickle.dump(self.hmm_model, fw)
             print(
                 "finish hmm modeling and saving in {}, start to analysys".format(
-                    self.hmm_folder_path
+                    self.hmm_files_path
                 )
             )
 
@@ -959,14 +969,14 @@ class HmmModel(ProbabilisticModel):
         print(len(val_test_traces), len(val_test_groundtruths))
 
         ###################### generate the detection results#########################
-        self.sentence_transition_failure_score_map = (
+        self.sentence_transition_positive_score_map = (
             self.get_sentence_scores_by_transition_binding(
                 val_test_traces, val_test_groundtruths
             )
         )
 
         aucroc_score, fpr, tpr = self.calculate_auc_probs(
-            self.sentence_transition_failure_score_map
+            self.sentence_transition_positive_score_map
         )
 
         print(
@@ -994,9 +1004,9 @@ class HmmModel(ProbabilisticModel):
             val_data_points[i]["step_by_step_analyzed_trace"] = one_trace
             val_data_points[i]["label"] = self.val_groundtruths[i]
 
-        if os.path.exists(self.hmm_folder_path):
-            print("load hmm model from {}".format(self.hmm_folder_path))
-            with open(self.hmm_folder_path, "rb") as f:
+        if os.path.exists(self.hmm_files_path):
+            print("load hmm model from {}".format(self.hmm_files_path))
+            with open(self.hmm_files_path, "rb") as f:
                 self.hmm_model = pickle.load(f)
         else:
             print("start to train hmm model...")
@@ -1006,32 +1016,32 @@ class HmmModel(ProbabilisticModel):
                 n_iter=self.iter_num,
             )
 
-            with open(self.hmm_folder_path, "wb") as fw:
+            with open(self.hmm_files_path, "wb") as fw:
                 pickle.dump(self.hmm_model, fw)
             print(
                 "finish hmm modeling and saving in {}, start to analysys".format(
-                    self.hmm_folder_path
+                    self.hmm_files_path
                 )
             )
         
 
         ######## construct hmm state models ########################################
-        self.state_failure_prob_map = self.construct_hmmstate_state_model(
+        self.state_positive_prob_map = self.construct_hmmstate_state_model(
             train_data_points
         )
 
         val_test_traces = self.val_traces + self.test_traces
         val_test_groundtruths = self.val_groundtruths + self.test_groundtruths
 
-        self.sentence_state_failure_score_map = (
+        self.sentence_state_positive_score_map = (
             self.get_sentence_scores_by_state_binding(
-                val_test_traces, self.state_failure_prob_map, val_test_groundtruths
+                val_test_traces, self.state_positive_prob_map, val_test_groundtruths
             )
         )
 
         ###################### prediction ##############################
         aucroc_score, fpr, tpr = self.calculate_auc_probs(
-            self.state_sentence_failure_score_map
+            self.sentence_state_positive_score_map
         )
 
         print(
@@ -1055,6 +1065,7 @@ class DtmcModel(ProbabilisticModel):
         test_ratio,
         is_attack_success,
         grid_history_dependency_num,
+        result_eval_path,
     ):
         super().__init__(
             dataset,
@@ -1065,7 +1076,8 @@ class DtmcModel(ProbabilisticModel):
             pca_dim,
             test_ratio,
             is_attack_success,
-            grid_history_dependency_num
+            grid_history_dependency_num,
+            result_eval_path,
         )
 
     def construct_dtmc_state_model(self, data_points):
@@ -1084,34 +1096,49 @@ class DtmcModel(ProbabilisticModel):
                 elif label == 0:
                     state_posterior_statics[state_id]["neg"] += 1
 
-        state_failure_prob_map = {}
+        state_positive_prob_map = {}
         for state in state_posterior_statics:
-            state_failure_prob_map[state] = state_posterior_statics[state]["neg"] / (
+            state_positive_prob_map[state] = state_posterior_statics[state]["pos"] / (
                 state_posterior_statics[state]["neg"]
                 + state_posterior_statics[state]["pos"]
                 + 1e-20
             )
 
-        return state_failure_prob_map
+        return state_positive_prob_map
+    
+    def get_semantic_state_model(self):
+        instances = self.train_instances
+        state_semantics = {}
+        for instance in instances:
+            one_trace = instance["state_trace"]
+            truth_prob = instance["truth_prob"]
+            for state_id in one_trace:
+                if state_id not in state_semantics:
+                    state_semantics[state_id] = [truth_prob]
+                else:
+                    state_semantics[state_id].append(truth_prob)
+        
+        state_semantics = {k: round(np.mean(v)*100) for k, v in state_semantics.items()}
+        return state_semantics
 
     def get_sentence_scores_by_state_binding(
-        self, sentence_traces, state_failure_prob_map, groundtruths
+        self, sentence_traces, state_positive_prob_map, groundtruths
     ):
-        sentence_failure_score = []
+        sentence_positive_score = []
         for i, sentence in enumerate(sentence_traces):
             # Map the sentence tokens to their fake probabilities
             sentence_probs = []
             for token in sentence:
-                if token not in state_failure_prob_map:
+                if token not in state_positive_prob_map:
                     sentence_probs.append(0.0)
                 else:
-                    sentence_probs.append(state_failure_prob_map[token])
+                    sentence_probs.append(state_positive_prob_map[token])
 
             # Calculate the mean fake probability for the sentence
-            sentence_probs = [1 - prob for prob in sentence_probs]
+            # sentence_probs = [1 - prob for prob in sentence_probs]
             # Classify the sentence as fake if mean_prob > 0.5, true otherwise
-            sentence_failure_score.append((groundtruths[i], sentence_probs))
-        return sentence_failure_score
+            sentence_positive_score.append((groundtruths[i], sentence_probs))
+        return sentence_positive_score
 
     def get_sentence_scores_by_transition_binding(self, sentence_traces, groundtruths):
         sentence_scores = []
@@ -1141,7 +1168,7 @@ class DtmcModel(ProbabilisticModel):
         val_test_traces = self.val_traces + self.test_traces
         val_test_groundtruths = self.val_groundtruths + self.test_groundtruths
 
-        self.sentence_transition_failure_score_map = (
+        self.sentence_transition_positive_score_map = (
             self.get_sentence_scores_by_transition_binding(
                 val_test_traces, val_test_groundtruths
             )
@@ -1149,7 +1176,7 @@ class DtmcModel(ProbabilisticModel):
 
         ###################### prediction ##############################
         aucroc_score, fpr, tpr = self.calculate_auc_probs(
-            self.sentence_transition_failure_score_map
+            self.sentence_transition_positive_score_map
         )
 
         print(
@@ -1167,22 +1194,22 @@ class DtmcModel(ProbabilisticModel):
             train_data_points[i]["step_by_step_analyzed_trace"] = one_trace
             train_data_points[i]["label"] = self.train_groundtruths[i]
 
-        self.state_failure_prob_map = self.construct_dtmc_state_model(
+        self.state_positive_prob_map = self.construct_dtmc_state_model(
             train_data_points
         )
         ####### Analyze the test sentence_test_scores ##############
         val_test_traces = self.val_traces + self.test_traces
         val_test_groundtruths = self.val_groundtruths + self.test_groundtruths
 
-        self.sentence_state_failure_score_map = (
+        self.sentence_state_positive_score_map = (
             self.get_sentence_scores_by_state_binding(
-                val_test_traces, self.state_failure_prob_map, val_test_groundtruths
+                val_test_traces, self.state_positive_prob_map, val_test_groundtruths
             )
         )
 
         ###################### prediction ##############################
         aucroc_score, fpr, tpr = self.calculate_auc_probs(
-            self.sentence_state_failure_score_map
+            self.sentence_state_positive_score_map
         )
 
         print(

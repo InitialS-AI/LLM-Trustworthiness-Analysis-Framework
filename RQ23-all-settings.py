@@ -9,27 +9,15 @@ import os
 from copy import deepcopy
 import numpy as np
 from scipy.stats import mannwhitneyu
+import argparse
 
-# Experiment settings
-dataset = "advglue++"
-info_type = "hidden_states"
-extract_block_idx = "31"
-abstraction_methods = ["Grid-based"]
-partition_nums = [5, 10, 15]
-abstraction_states = [200, 400, 600]
-cluster_methods = ["GMM", "KMeans"]
-pca_dims = [3, 5, 10]
-probability_models = ["HMM"]
-hmm_n_comps = [100, 200, 400]
-grid_history_dependency = [1, 2, 3]
-grid_hmm_n_comps = [100, 200, 400]
 
-# Initialize dictionary to store results for each metric
-results = defaultdict(list)
-
-def write_result_to_csv(result, settings_str, path="eval/{}/{}/grid_rq23_all_settings_{}.csv".format(
-    dataset, extract_block_idx, info_type
-)):
+def write_result_to_csv(
+    result, settings_str, dataset, extract_block_idx, info_type, llm
+):
+    path = "eval/{}/{}/{}/{}/rq23_all_settings.csv".format(
+        dataset, extract_block_idx, info_type, llm
+    )
     result["settings"] = settings_str  # Add settings to the result
 
     dict_result = {
@@ -63,7 +51,7 @@ def write_result_to_csv(result, settings_str, path="eval/{}/{}/grid_rq23_all_set
     for key, value in result["stationary_distribution_entropy_dict"].items():
         result[key] = value
     del result["stationary_distribution_entropy_dict"]
- 
+
     df = pd.DataFrame([result])  # Create a DataFrame for the single result
     if not os.path.isfile(path):
         print("Creating new file")
@@ -182,6 +170,7 @@ def rq3(state_abstract_args, prob_args, train_instances, val_instances, test_ins
 
     return eval_result_dict
 
+
 def run_experiment(
     train_instances,
     val_instances,
@@ -194,7 +183,7 @@ def run_experiment(
     grid_history_dependency_num=None,
 ):
     state_abstract_args = {
-        "llm_name": "alpaca_7B",
+        "llm_name": llm,
         "result_save_path": "../../../data/llmAnalysis/songda",
         "dataset": dataset,
         "test_ratio": 0.2,
@@ -242,7 +231,7 @@ def run_experiment(
     train_probs, test_probs, val_probs = result["transition_matrix_list"]
     test_probs = np.array(test_probs)
     val_probs = np.array(val_probs)
-    _, p_value = mannwhitneyu(test_probs, val_probs, alternative='two-sided')
+    _, p_value = mannwhitneyu(test_probs, val_probs, alternative="two-sided")
     if p_value < 0.05:
         return result, settings_str
     else:
@@ -280,6 +269,9 @@ def load_data(state_abstract_args):
     elif dataset == "sst2":
         loader = data_loader.OodDataLoader(dataset_folder_path, llm_name)
 
+    elif dataset == "humaneval" or dataset == "mbpp":
+        loader = data_loader.CodeLoader(dataset_folder_path, llm_name)
+
     else:
         raise NotImplementedError("Unknown dataset!")
 
@@ -314,35 +306,88 @@ def load_data(state_abstract_args):
     return train_instances, val_instances, test_instances
 
 
-state_abstract_args = {
-    "llm_name": "alpaca_7B",
-    "result_save_path": "../../../data/llmAnalysis/songda",
-    "dataset": dataset,
-    "test_ratio": 0.2,
-    "extract_block_idx": extract_block_idx,
-    "info_type": info_type,
-    "is_attack_success": 1,
-}
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--result_save_path",
+        type=str,
+        default="../../../data/llmAnalysis/songda",
+        required=True,
+    )
+    parser.add_argument("--llm", type=str, default="alpaca_7B")
 
-train_instances_loaded, val_instances_loaded, test_instances_loaded = load_data(
-    state_abstract_args
-)
-# Iterate through each abstraction method (Grid-based and Cluster-based)
-for abstraction_method in abstraction_methods:
-    # If Grid-based abstraction method is chosen
-    if abstraction_method == "Grid-based":
-        # Iterate through possible partition numbers for the grid-based method
-        for partition_num in partition_nums:
-            # Explore the impact of different PCA dimensions
-            for pca_dim in pca_dims:
-                # Explore results for different probability models (DTMC and HMM)
-                for model_type in probability_models:
-                    # Explore different numbers of Grid history dependency
-                    for grid_history_dependency_num in grid_history_dependency:
-                        # If the model is Hidden Markov Model (HMM)
-                        if model_type == "HMM":
-                            # Iterate over different numbers of HMM components
-                            for hmm_n_comp in grid_hmm_n_comps:
+    args = parser.parse_args()
+
+    # Experiment settings
+    llm = args.llm
+    dataset = "truthful_qa"
+    info_type = "hidden_states"
+    extract_block_idx = "31"
+    abstraction_methods = ["Grid-based", "Cluster-based"]
+    partition_nums = [5, 10, 15]
+    abstraction_states = [200, 400, 600]
+    cluster_methods = ["GMM", "KMeans"]
+    pca_dims = [512, 1024, 2048]
+    grid_pca_dims = [3, 5, 10]
+    probability_models = ["DTMC"]
+    hmm_n_comps = [100, 200, 400]
+    grid_history_dependency = [1, 2, 3]
+    grid_hmm_n_comps = [100, 200, 400]
+    state_abstract_args = {
+        "llm_name": llm,
+        "result_save_path": args.result_save_path,
+        "dataset": dataset,
+        "test_ratio": 0.2,
+        "extract_block_idx": extract_block_idx,
+        "info_type": info_type,
+        "is_attack_success": 1,
+    }
+
+    train_instances_loaded, val_instances_loaded, test_instances_loaded = load_data(
+        state_abstract_args
+    )
+    # Iterate through each abstraction method (Grid-based and Cluster-based)
+    for abstraction_method in abstraction_methods:
+        # If Grid-based abstraction method is chosen
+        if abstraction_method == "Grid-based":
+            # Iterate through possible partition numbers for the grid-based method
+            for partition_num in partition_nums:
+                # Explore the impact of different PCA dimensions
+                for pca_dim in grid_pca_dims:
+                    # Explore results for different probability models (DTMC and HMM)
+                    for model_type in probability_models:
+                        # Explore different numbers of Grid history dependency
+                        for grid_history_dependency_num in grid_history_dependency:
+                            # If the model is Hidden Markov Model (HMM)
+                            if model_type == "HMM":
+                                # Iterate over different numbers of HMM components
+                                for hmm_n_comp in grid_hmm_n_comps:
+                                    train_instances = deepcopy(train_instances_loaded)
+                                    val_instances = deepcopy(val_instances_loaded)
+                                    test_instances = deepcopy(test_instances_loaded)
+                                    result, settings_str = run_experiment(
+                                        train_instances,
+                                        val_instances,
+                                        test_instances,
+                                        "Grid",
+                                        partition_num,
+                                        pca_dim,
+                                        model_type,
+                                        hmm_n_comp=hmm_n_comp,
+                                        grid_history_dependency_num=grid_history_dependency_num,
+                                    )
+                                    print("result", result)
+                                    if result:
+                                        write_result_to_csv(
+                                            result,
+                                            settings_str,
+                                            dataset,
+                                            extract_block_idx,
+                                            info_type,
+                                            llm,
+                                        )
+
+                            else:
                                 train_instances = deepcopy(train_instances_loaded)
                                 val_instances = deepcopy(val_instances_loaded)
                                 test_instances = deepcopy(test_instances_loaded)
@@ -354,40 +399,44 @@ for abstraction_method in abstraction_methods:
                                     partition_num,
                                     pca_dim,
                                     model_type,
-                                    hmm_n_comp=hmm_n_comp,
                                     grid_history_dependency_num=grid_history_dependency_num,
                                 )
-                                print("result", result)
+                                if result:
+                                    write_result_to_csv(
+                                        result,
+                                        settings_str,
+                                        dataset,
+                                        extract_block_idx,
+                                        info_type,
+                                        llm,
+                                    )
+
+        # If Cluster-based abstraction method is chosen
+        elif abstraction_method == "Cluster-based":
+            # (similar logic as above for cluster-based experiments)
+            for abstraction_state, cluster_method in product(
+                abstraction_states, cluster_methods
+            ):
+                for pca_dim in pca_dims:
+                    for model_type in probability_models:
+                        if model_type == "HMM":
+                            for hmm_n_comp in hmm_n_comps:
+                                train_instances = deepcopy(train_instances_loaded)
+                                val_instances = deepcopy(val_instances_loaded)
+                                test_instances = deepcopy(test_instances_loaded)
+                                result, settings_str = run_experiment(
+                                    train_instances,
+                                    val_instances,
+                                    test_instances,
+                                    cluster_method,
+                                    abstraction_state,
+                                    pca_dim,
+                                    model_type,
+                                    hmm_n_comp=hmm_n_comp,
+                                )
                                 if result:
                                     write_result_to_csv(result, settings_str)
-                               
                         else:
-                            train_instances = deepcopy(train_instances_loaded)
-                            val_instances = deepcopy(val_instances_loaded)
-                            test_instances = deepcopy(test_instances_loaded)
-                            result, settings_str = run_experiment(
-                                train_instances,
-                                val_instances,
-                                test_instances,
-                                "Grid",
-                                partition_num,
-                                pca_dim,
-                                model_type,
-                                grid_history_dependency_num=grid_history_dependency_num,
-                            )
-                            if result:
-                                write_result_to_csv(result, settings_str)
-
-    # If Cluster-based abstraction method is chosen
-    elif abstraction_method == "Cluster-based":
-        # (similar logic as above for cluster-based experiments)
-        for abstraction_state, cluster_method in product(
-            abstraction_states, cluster_methods
-        ):
-            for pca_dim in pca_dims:
-                for model_type in probability_models:
-                    if model_type == "HMM":
-                        for hmm_n_comp in hmm_n_comps:
                             train_instances = deepcopy(train_instances_loaded)
                             val_instances = deepcopy(val_instances_loaded)
                             test_instances = deepcopy(test_instances_loaded)
@@ -399,23 +448,10 @@ for abstraction_method in abstraction_methods:
                                 abstraction_state,
                                 pca_dim,
                                 model_type,
-                                hmm_n_comp=hmm_n_comp,
                             )
                             if result:
                                 write_result_to_csv(result, settings_str)
-                    else:
-                        train_instances = deepcopy(train_instances_loaded)
-                        val_instances = deepcopy(val_instances_loaded)
-                        test_instances = deepcopy(test_instances_loaded)
-                        result, settings_str = run_experiment(
-                            train_instances,
-                            val_instances,
-                            test_instances,
-                            cluster_method,
-                            abstraction_state,
-                            pca_dim,
-                            model_type,
-                        )
-                        if result:
-                            write_result_to_csv(result, settings_str)
 
+
+if __name__ == "__main__":
+    main()

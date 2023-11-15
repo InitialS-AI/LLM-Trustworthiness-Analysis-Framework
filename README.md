@@ -234,9 +234,15 @@ Prepare a structure to store the results of your experiments.
 results = defaultdict(list)
 ```
 
-#### Step 4: Running the Experiment
+Step 4: Running the Experiment with Command-line Argument
+To run the experiment with a specified result save path, use the command-line interface. The script RQ23-all-settings.py accepts a --result_save_path argument to determine where to save the results. Here's how to run the experiment:
 
-Utilize the LUNA framework to run your experiment with the specified configurations. This involves processing the data, applying the abstraction methods, and collecting metrics.
+```bash
+python RQ23-all-settings.py --result_save_path <path-to-save-results>
+```
+This command will execute the script with the provided result save path. Ensure the path is correctly specified relative to the script's location. The script will internally handle the experiment setup, execution, and result storage based on the configurations set within the file.
+
+
 
 ```python
 # Iterate through each abstraction method (Grid-based and Cluster-based)
