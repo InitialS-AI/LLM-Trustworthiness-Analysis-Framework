@@ -1,7 +1,6 @@
 # 🚀🦸 LUNA: A Model-based LLM-Oriented Universal Analysis Framework
 
-A comprehensive framework to construct abstract models for analyzing various tasks. The current experiments are conducted on OOD Detection, Adversarial Attacks, and Hallucination.
-
+A comprehensive framework to construct abstract models for analyzing various tasks.
 ## Table of Contents
 
 - [Installation](#installation)
