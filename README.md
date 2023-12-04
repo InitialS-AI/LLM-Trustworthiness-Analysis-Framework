@@ -44,7 +44,7 @@ The `luna` folder contains all the essential APIs for model abstraction and metr
 
 To analyze your data, you first need to initialize the `MetricsAppEvalCollections` class. This class is responsible for collecting various metrics on your data based on abstract model representations:
 
-\```python
+```python
 eval_obj = MetricsAppEvalCollections(
     state_abstract_args_obj,
     prob_args_obj,
@@ -52,7 +52,7 @@ eval_obj = MetricsAppEvalCollections(
     val_instances,
     test_instances,
 )
-\```
+```
 
 Where:
 
@@ -66,21 +66,21 @@ Once the `MetricsAppEvalCollections` object is initialized, you can then collect
 
 - Evaluating the model:
 
-  \```python
+  ```python
   aucroc, accuracy, f1_score, _, _, abnormal_threshold = eval_obj.get_eval_result()
-  \```
+  ```
 
 - Calculating preciseness:
 
-  \```python
+  ```python
   preciseness = eval_obj.preciseness()
-  \```
+  ```
 
 - Calculating entropy:
 
-  \```python
+  ```python
   entropy = eval_obj.entropy()
-  \```
+  ```
 
 ... and many other metrics as shown in the `rq3` function.
 
@@ -90,13 +90,37 @@ Once the `MetricsAppEvalCollections` object is initialized, you can then collect
 ## Datasets
 We've conducted experiments on the following datasets:
 
-- **TruthfulQA** - For the hallucination dataset, we choose
-TruthfulQA [1], which is designed for measuring the truth-
-fulness of LLM in generating answers to questions. It consists
-of 817 questions, with 38 categories of falsehood, e.g., mis-
-conceptions and fiction. The ground truth of the answers is
-judged by fine-tuned GPT-3-13B models [1] to classify each
-answer as true or false.
+Certainly! Here's a clearer version of the Markdown text, with enhanced structure and readability:
+
+---
+
+### TruthfulQA Dataset Overview
+
+- **Purpose**: TruthfulQA is designed to evaluate the truthfulness of Large Language Models (LLMs) in generating answers to questions.
+- **Composition**: The dataset contains 817 questions across 38 categories of potential falsehoods, such as misconceptions and fiction.
+- **Truth Assessment**: Answers' truthfulness is judged using fine-tuned GPT-3-13B models, classifying each response as true or false.
+
+### Pre-requisites for Using the TruthfulQA Dataset
+
+Before utilizing the TruthfulQA dataset, certain preparatory steps are required:
+
+1. **OpenAI API Account**:
+   - Ensure you have an active account with OpenAI's API.
+
+2. **Model Fine-Tuning**:
+   - Follow the guide on [Inference-Time Intervention: Eliciting Truthful Answers from a Language Model](https://github.com/likenneth/honest_llama#truthfulqa-evaluation) to create GPT-JUDGE, a fine-tuned GPT-3 model.
+
+3. **Dataset Preparation**:
+   - Run the `add_scores_to_truthful_qa.py` script to process the dataset. 
+   - Make sure to update the `file_name` and `file_with_score` variables in the script with the correct file paths.
+
+   Execute the following command in your terminal:
+   ```bash
+   python add_scores_to_truthful_qa.py
+   ```
+
+---
+
 - **SST-2** - For Out-of-Distribution, we adapt the sentiment
 analysis dataset created by Wang et al. [2]. It is based on
 SST-2 dataset [3], and contains word-level and sentence-
