@@ -121,18 +121,29 @@ Before utilizing the TruthfulQA dataset, certain preparatory steps are required:
 
 ---
 
-- **SST-2** - For Out-of-Distribution, we adapt the sentiment
-analysis dataset created by Wang et al. [2]. It is based on
-SST-2 dataset [3], and contains word-level and sentence-
-level style transferred data, where the original sentences
-are transformed to another style. It contains a total of 9,603
-sentences, with 873 in-distribution (ID) data and 8,730 OOD
-data.
-- **AdvGLUE++** - For the adversarial attack dataset, we
-use AdvGLUE++ [4], which consists of three types of tasks
-(sentiment classification, duplicate question detection, and
-multi-genre natural language inference) and five word-level
-attack methods. It contains 11,484 data in total.
+Sure, here's a revised version of the descriptions for the SST-2 and AdvGLUE++ datasets:
+
+---
+
+### SST-2 Dataset Overview
+
+- **Context**: SST-2 is adapted for Out-of-Distribution (OOD) analysis, based on the sentiment analysis dataset by Wang et al. [2].
+- **Composition**: This dataset builds upon the original SST-2 dataset [3] and includes word-level and sentence-level style transferred data. This involves transforming original sentences into a different style.
+- **Size and Distribution**:
+   - Total Sentences: 9,603.
+   - In-Distribution (ID) Data: 873 sentences.
+   - Out-of-Distribution (OOD) Data: 8,730 sentences.
+
+### AdvGLUE++ Dataset Overview
+
+- **Purpose**: AdvGLUE++ is used for evaluating model performance against adversarial attacks.
+- **Tasks and Methods**:
+   - Encompasses three types of tasks: Sentiment Classification, Duplicate Question Detection, and Multi-Genre Natural Language Inference.
+   - Incorporates five word-level attack methods.
+- **Dataset Size**: Consists of a total of 11,484 data points.
+
+---
+
 
 The dataset can be found in LUNA/datasets folder. You can also check generate.py file about how to use it.
 
