@@ -109,6 +109,11 @@ Before utilizing the TruthfulQA dataset, certain preparatory steps are required:
 
 2. **Model Fine-Tuning**:
    - Follow the guide on [Inference-Time Intervention: Eliciting Truthful Answers from a Language Model](https://github.com/likenneth/honest_llama#truthfulqa-evaluation) to create GPT-JUDGE, a fine-tuned GPT-3 model.
+   - We provided a READY-TO-USE GPT-Judge.
+     ```bash
+     judge_model_key = "curie:ft-momentum-lab-2023-07-07-11-31-31"
+     info_model_key = "curie:ft-momentum-lab-2023-07-07-14-15-29"
+     ```
 
 3. **Dataset Preparation**:
    - Run the `add_scores_to_truthful_qa.py` script to process the dataset. 
