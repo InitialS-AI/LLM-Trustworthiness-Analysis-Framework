@@ -15,9 +15,11 @@ import argparse
 def write_result_to_csv(
     result, settings_str, dataset, extract_block_idx, info_type, llm
 ):
-    path = "eval/{}/{}/{}/{}/rq23_all_settings.csv".format(
-        dataset, extract_block_idx, info_type, llm
-    )
+    csv_folder = f"eval/{dataset}/{extract_block_idx}/{info_type}/{llm}"
+    path = csv_folder + "/rq23_all_settings.csv"
+
+    if not os.path.exists(csv_folder):
+        os.makedirs(csv_folder)
     result["settings"] = settings_str  # Add settings to the result
 
     dict_result = {
@@ -184,7 +186,7 @@ def run_experiment(
 ):
     state_abstract_args = {
         "llm_name": llm,
-        "result_save_path": "../../../data/llmAnalysis/songda",
+        "result_save_path": "outputs",
         "dataset": dataset,
         "test_ratio": 0.2,
         "extract_block_idx": extract_block_idx,
@@ -311,8 +313,7 @@ def main():
     parser.add_argument(
         "--result_save_path",
         type=str,
-        default="../../../data/llmAnalysis/songda",
-        required=True,
+        default="outputs",
     )
     parser.add_argument("--llm", type=str, default="alpaca_7B")
 

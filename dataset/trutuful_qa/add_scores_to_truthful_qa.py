@@ -3,8 +3,8 @@ import joblib
 from truthfulqa_eval.utilities import format_end2end_prompt
 import openai
 
-file_name = "../../../../data/songda/truthful_qa/31/alpaca_7B.joblib"
-file_with_scores = "../../../../data/songda/truthful_qa/31/alpaca_7B_with_score.joblib"
+file_name = "outputs/truthful_qa/31/alpaca_7B.joblib"
+file_with_scores = "outputs/truthful_qa/31/alpaca_7B_with_score.joblib"
 
 fp = open(file_name, "rb")
 fw = open(file_with_scores, "ab+")

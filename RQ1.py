@@ -133,8 +133,7 @@ def main():
     parser.add_argument(
         "--result_save_path",
         type=str,
-        default="../../../data/llmAnalysis/songda",
-        required=True,
+        default="outputs",
     )
     parser.add_argument("--llm", type=str, default="alpaca_7B")
 
