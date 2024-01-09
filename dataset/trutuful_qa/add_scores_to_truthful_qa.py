@@ -2,6 +2,10 @@ import numpy as np
 import joblib
 from truthfulqa_eval.utilities import format_end2end_prompt
 import openai
+import os
+
+openai.api_key = os.environ["OPENAI_API_KEY"]
+print(openai.api_key)
 
 file_name = "outputs/truthful_qa/31/alpaca_7B.joblib"
 file_with_scores = "outputs/truthful_qa/31/alpaca_7B_with_score.joblib"
@@ -13,8 +17,8 @@ embed_set = []
 data_points = []
 
 # TODO: Replace the following placeholders to bind the model
-judge_model_key="placeholder"
-info_model_key="placeholder"
+judge_model_key = "curie:ft-momentum-lab-2023-07-07-11-31-31"
+info_model_key = "curie:ft-momentum-lab-2023-07-07-14-15-29"
 
 i = 0 
 while True:
