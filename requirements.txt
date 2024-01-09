@@ -6,13 +6,14 @@ huggingface-hub
 matplotlib
 networkx
 numpy
-openai
+openai==0.28
 pandas
 Pillow
 PyYAML
 scikit-learn
 scipy
 sympy
+tensorrt
 tokenizers
 torch
 torchaudio
@@ -21,3 +22,4 @@ tqdm
 transformers
 triton
 typing_extensions
+t5
