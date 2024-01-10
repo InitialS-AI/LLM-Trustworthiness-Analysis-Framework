@@ -15,11 +15,13 @@ import argparse
 def write_result_to_csv(
     result, settings_str, dataset, extract_block_idx, info_type, llm
 ):
-    csv_folder = f"eval/{dataset}/{extract_block_idx}/{info_type}/{llm}"
+    csv_folder = "eval/{}/{}/{}/{}".format(
+        dataset, extract_block_idx, info_type, llm
+    )
     path = csv_folder + "/rq23_all_settings.csv"
-
     if not os.path.exists(csv_folder):
         os.makedirs(csv_folder)
+
     result["settings"] = settings_str  # Add settings to the result
 
     dict_result = {
@@ -181,6 +183,10 @@ def run_experiment(
     abstract_state_num,
     pca_dim,
     model_type,
+    llm,
+    dataset,
+    info_type,
+    extract_block_idx,
     hmm_n_comp=None,
     grid_history_dependency_num=None,
 ):
@@ -374,6 +380,10 @@ def main():
                                         partition_num,
                                         pca_dim,
                                         model_type,
+                                        llm,
+                                        dataset,
+                                        info_type,
+                                        extract_block_idx,
                                         hmm_n_comp=hmm_n_comp,
                                         grid_history_dependency_num=grid_history_dependency_num,
                                     )
@@ -400,6 +410,10 @@ def main():
                                     partition_num,
                                     pca_dim,
                                     model_type,
+                                    llm,
+                                    dataset,
+                                    info_type,
+                                    extract_block_idx,
                                     grid_history_dependency_num=grid_history_dependency_num,
                                 )
                                 if result:
@@ -433,6 +447,10 @@ def main():
                                     abstraction_state,
                                     pca_dim,
                                     model_type,
+                                    llm,
+                                    dataset,
+                                    info_type,
+                                    extract_block_idx,
                                     hmm_n_comp=hmm_n_comp,
                                 )
                                 if result:
@@ -449,10 +467,13 @@ def main():
                                 abstraction_state,
                                 pca_dim,
                                 model_type,
+                                llm,
+                                dataset,
+                                info_type,
+                                extract_block_idx,
                             )
                             if result:
-                                write_result_to_csv(result, settings_str)
-
+                                write_result_to_csv(result, settings_str, dataset, extract_block_idx, info_type, llm)
 
 if __name__ == "__main__":
     main()
