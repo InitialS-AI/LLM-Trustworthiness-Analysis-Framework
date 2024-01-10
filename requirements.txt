@@ -2,6 +2,7 @@ aiohttp
 aiosignal
 asttokens
 datasets
+hmmlearn
 huggingface-hub
 matplotlib
 networkx
@@ -12,6 +13,7 @@ Pillow
 PyYAML
 scikit-learn
 scipy
+seaborn
 sympy
 tokenizers
 torch
