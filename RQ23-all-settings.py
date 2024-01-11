@@ -7,6 +7,7 @@ from itertools import product
 from collections import defaultdict
 import os
 from copy import deepcopy
+from datetime import datetime
 import numpy as np
 from scipy.stats import mannwhitneyu
 import argparse
@@ -15,10 +16,11 @@ import argparse
 def write_result_to_csv(
     result, settings_str, dataset, extract_block_idx, info_type, llm
 ):
+    timestamp = datetime.now().strftime("%Y%m%d%H%M")
     csv_folder = "eval/{}/{}/{}/{}".format(
         dataset, extract_block_idx, info_type, llm
     )
-    path = csv_folder + "/rq23_all_settings.csv"
+    path = "{}/{}_rq23_all_setting.csv".format(csv_folder, timestamp)
     if not os.path.exists(csv_folder):
         os.makedirs(csv_folder)
 
