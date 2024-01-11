@@ -1,4 +1,4 @@
-from luna.abstraction_model import GMM, KMeans, RegularGrid
+from luna.abstraction_model import GMM, KMeans, Birch, RegularGrid
 import luna.data_loader as data_loader
 import numpy as np
 from tqdm import tqdm
@@ -107,6 +107,8 @@ class AbstractStateExtraction:
             abstraction_model = GMM(abstract_state)
         elif cluster_method == "KMeans":
             abstraction_model = KMeans(abstract_state)
+        elif cluster_method == "Birch":
+            abstraction_model = Birch(abstract_state)
         elif cluster_method == "Grid":
             abstraction_model = RegularGrid(abstract_state, grid_history_dependency_num)
         else:

@@ -334,6 +334,7 @@ def main():
     partition_nums = [5, 10, 15]
     abstraction_states = [200, 400, 600]
     cluster_methods = ["GMM", "KMeans"]
+    # cluster_methods = ["Birch"]
     pca_dims = [512, 1024, 2048]
     grid_pca_dims = [3, 5, 10]
     probability_models = ["DTMC"]

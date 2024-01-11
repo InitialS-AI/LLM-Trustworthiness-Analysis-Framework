@@ -614,6 +614,8 @@ class MetricsAppEvalCollections:
             cluster_centers = (
                 self.abstractStateExtraction.cluster_model.cluster_centers_
             )
+        elif cluster_method == "Birch":
+            cluster_centers = self.abstractStateExtraction.cluster_model.cluster_centers_
         elif cluster_method == "GMM":
             cluster_centers = self.abstractStateExtraction.cluster_model.means_
         else:
