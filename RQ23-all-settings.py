@@ -4,7 +4,6 @@ import luna.data_loader as data_loader
 from types import SimpleNamespace
 import pandas as pd
 from itertools import product
-from collections import defaultdict
 import os
 from copy import deepcopy
 from datetime import datetime
@@ -14,9 +13,10 @@ import argparse
 
 
 def write_result_to_csv(
-    result, settings_str, dataset, extract_block_idx, info_type, llm
+    timestamp, result, settings_str, dataset, extract_block_idx, info_type, llm,
+    abstraction_method=None, partition_num=None, pca_dim=None, model_type=None,
+    hmm_n_comp=None, grid_history_dependency_num=None
 ):
-    timestamp = datetime.now().strftime("%Y%m%d%H%M")
     csv_folder = "eval/{}/{}/{}/{}".format(
         dataset, extract_block_idx, info_type, llm
     )
@@ -24,7 +24,62 @@ def write_result_to_csv(
     if not os.path.exists(csv_folder):
         os.makedirs(csv_folder)
 
-    result["settings"] = settings_str  # Add settings to the result
+    result.update({
+        "dataset": dataset,
+        "abstraction_method": abstraction_method,
+        "partition_num": partition_num,
+        "pca_dim": pca_dim,
+        "model_type": model_type,
+        "hmm_n_comp": hmm_n_comp,
+        "grid_history_dependency_num": grid_history_dependency_num,
+        "settings": settings_str,
+    })
+
+    columns_order = [
+        "dataset",
+        "abstraction_method",
+        "partition_num",
+        "pca_dim",
+        "model_type",
+        "hmm_n_comp",
+        "grid_history_dependency_num",
+        "settings",
+        "aucroc",
+        "accuracy",
+        "f1_score",
+        "abnormal_threshold",
+        "preciseness_mean",
+        "preciseness_max",
+        "entropy_val",
+        "entropy_test",
+        "probabilistic_reasoning_divergence",
+        "value_diversity_instant_level_val",
+        "value_diversity_instant_level_test",
+        "value_diversity_n_gram_level_val",
+        "value_diversity_n_gram_level_test",
+        "derivative_diversity_n_gram_level_val_increasing",
+        "derivative_diversity_n_gram_level_val_decreasing",
+        "derivative_diversity_n_gram_level_test_increasing",
+        "derivative_diversity_n_gram_level_test_decreasing",
+        "second_derivative_diversity_n_gram_level_val_increasing",
+        "second_derivative_diversity_n_gram_level_val_decreasing",
+        "second_derivative_diversity_n_gram_level_test_increasing",
+        "second_derivative_diversity_n_gram_level_test_decreasing",
+        "succinctness",
+        "coverage",
+        "sensitivity",
+        "sink_state",
+        "source_state",
+        "recurrent_state",
+        "abstract_model_perplexity_good",
+        "abstract_model_perplexity_bad",
+        "abstract_model_smoothed_perplexity_2_good",
+        "abstract_model_smoothed_perplexity_2_bad",
+        "abstract_model_smoothed_perplexity_3_good",
+        "abstract_model_smoothed_perplexity_3_bad",
+        "abstract_model_smoothed_perplexity_4_good",
+        "abstract_model_smoothed_perplexity_4_bad",
+    ]
 
     dict_result = {
         "abstract_model_perplexity_good": result["perplexity_abstract_model"][0],
@@ -58,17 +113,18 @@ def write_result_to_csv(
         result[key] = value
     del result["stationary_distribution_entropy_dict"]
 
-    df = pd.DataFrame([result])  # Create a DataFrame for the single result
+    df = pd.DataFrame([result])[columns_order]
+
     if not os.path.isfile(path):
         print("Creating new file")
         df.to_csv(
             path, mode="w", index=False, header=True
-        )  # Write with header if file doesn't exist
+        )
     else:
         print("Appending to existing file")
         df.to_csv(
             path, mode="a", index=False, header=False
-        )  # Append without header if file exists
+        )
 
 
 def rq3(state_abstract_args, prob_args, train_instances, val_instances, test_instances):
@@ -317,6 +373,8 @@ def load_data(state_abstract_args):
 
 
 def main():
+    timestamp = datetime.now().strftime("%Y%m%d%H%M")
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--result_save_path",
@@ -329,7 +387,7 @@ def main():
 
     # Experiment settings
     llm = args.llm
-    dataset = "truthful_qa"
+    dataset = "advglue++"
     info_type = "hidden_states"
     extract_block_idx = "31"
     abstraction_methods = ["Grid-based", "Cluster-based"]
@@ -393,12 +451,19 @@ def main():
                                     print("result", result)
                                     if result:
                                         write_result_to_csv(
-                                            result,
-                                            settings_str,
-                                            dataset,
-                                            extract_block_idx,
-                                            info_type,
-                                            llm,
+                                            timestamp=timestamp,
+                                            result=result,
+                                            settings_str=settings_str,
+                                            dataset=dataset,
+                                            extract_block_idx=extract_block_idx,
+                                            info_type=info_type,
+                                            llm=llm,
+                                            abstraction_method=abstraction_method,
+                                            partition_num=partition_num,
+                                            pca_dim=pca_dim,
+                                            model_type=model_type,
+                                            hmm_n_comp=hmm_n_comp,
+                                            grid_history_dependency_num=grid_history_dependency_num,
                                         )
 
                             else:
@@ -421,12 +486,18 @@ def main():
                                 )
                                 if result:
                                     write_result_to_csv(
-                                        result,
-                                        settings_str,
-                                        dataset,
-                                        extract_block_idx,
-                                        info_type,
-                                        llm,
+                                        timestamp=timestamp,
+                                        result=result,
+                                        settings_str=settings_str,
+                                        dataset=dataset,
+                                        extract_block_idx=extract_block_idx,
+                                        info_type=info_type,
+                                        llm=llm,
+                                        abstraction_method=abstraction_method,
+                                        partition_num=partition_num,
+                                        pca_dim=pca_dim,
+                                        model_type=model_type,
+                                        grid_history_dependency_num=grid_history_dependency_num,
                                     )
 
         # If Cluster-based abstraction method is chosen
@@ -457,7 +528,20 @@ def main():
                                     hmm_n_comp=hmm_n_comp,
                                 )
                                 if result:
-                                    write_result_to_csv(result, settings_str)
+                                    write_result_to_csv(
+                                        timestamp=timestamp,
+                                        result=result,
+                                        settings_str=settings_str,
+                                        dataset=dataset,
+                                        extract_block_idx=extract_block_idx,
+                                        info_type=info_type,
+                                        llm=llm,
+                                        abstraction_method=abstraction_method,
+                                        partition_num=partition_num,
+                                        pca_dim=pca_dim,
+                                        model_type=model_type,
+                                        grid_history_dependency_num=grid_history_dependency_num
+                                    )
                         else:
                             train_instances = deepcopy(train_instances_loaded)
                             val_instances = deepcopy(val_instances_loaded)
@@ -476,7 +560,20 @@ def main():
                                 extract_block_idx,
                             )
                             if result:
-                                write_result_to_csv(result, settings_str, dataset, extract_block_idx, info_type, llm)
+                                write_result_to_csv(
+                                    timestamp=timestamp,
+                                    result=result,
+                                    settings_str=settings_str,
+                                    dataset=dataset,
+                                    extract_block_idx=extract_block_idx,
+                                    info_type=info_type,
+                                    llm=llm,
+                                    abstraction_method=abstraction_method,
+                                    partition_num=partition_num,
+                                    pca_dim=pca_dim,
+                                    model_type=model_type,
+                                    grid_history_dependency_num=grid_history_dependency_num
+                                )
 
 if __name__ == "__main__":
     main()
