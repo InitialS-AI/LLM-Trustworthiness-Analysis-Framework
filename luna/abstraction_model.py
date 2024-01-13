@@ -1,7 +1,7 @@
 from luna.utils.interfaces import Grid
 import numpy as np
 from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering
+from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering
 from tqdm import tqdm
 
 class AbstractModel(object):
@@ -32,6 +32,7 @@ class KMeans(AbstractModel):
 
 class Birch(AbstractModel):
     def __init__(self, components):
+        print("Birch")
         super().__init__()
         self.clustering = BirchClustering(n_clusters=components)
 

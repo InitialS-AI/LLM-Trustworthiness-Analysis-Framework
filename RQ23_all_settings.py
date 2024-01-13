@@ -14,19 +14,30 @@ import argparse
 
 def write_result_to_csv(
     timestamp, result, settings_str, dataset, extract_block_idx, info_type, llm,
-    abstraction_method=None, partition_num=None, pca_dim=None, model_type=None,
-    hmm_n_comp=None, grid_history_dependency_num=None
+    process_title='rq23_all_settings',
+    abstraction_method=None,
+    abstraction_state=None,
+    cluster_method=None,
+    partition_num=None,
+    pca_dim=None,
+    epsilon=None,
+    model_type=None,
+    hmm_n_comp=None,
+    grid_history_dependency_num=None
 ):
     csv_folder = "eval/{}/{}/{}/{}".format(
         dataset, extract_block_idx, info_type, llm
     )
-    path = "{}/{}_rq23_all_setting.csv".format(csv_folder, timestamp)
+    path = "{}/{}_{}.csv".format(csv_folder, timestamp, process_title)
     if not os.path.exists(csv_folder):
         os.makedirs(csv_folder)
 
     result.update({
         "dataset": dataset,
         "abstraction_method": abstraction_method,
+        "abstraction_state": abstraction_state,
+        "cluster_method": cluster_method,
+        "epsilon": epsilon,
         "partition_num": partition_num,
         "pca_dim": pca_dim,
         "model_type": model_type,
@@ -39,6 +50,9 @@ def write_result_to_csv(
         "dataset",
         "abstraction_method",
         "partition_num",
+        "abstraction_state",
+        "cluster_method",
+        "epsilon",
         "pca_dim",
         "model_type",
         "hmm_n_comp",
@@ -419,17 +433,17 @@ def main():
         # If Grid-based abstraction method is chosen
         if abstraction_method == "Grid-based":
             # Iterate through possible partition numbers for the grid-based method
-            for partition_num in partition_nums:
+            for partition_num in partition_nums: # 5, 10, 15
                 # Explore the impact of different PCA dimensions
-                for pca_dim in grid_pca_dims:
+                for pca_dim in grid_pca_dims:  # 3, 5, 10
                     # Explore results for different probability models (DTMC and HMM)
-                    for model_type in probability_models:
+                    for model_type in probability_models: # DTMC, HMM
                         # Explore different numbers of Grid history dependency
-                        for grid_history_dependency_num in grid_history_dependency:
+                        for grid_history_dependency_num in grid_history_dependency: # 1, 2, 3
                             # If the model is Hidden Markov Model (HMM)
                             if model_type == "HMM":
                                 # Iterate over different numbers of HMM components
-                                for hmm_n_comp in grid_hmm_n_comps:
+                                for hmm_n_comp in grid_hmm_n_comps: # 100, 200, 400
                                     train_instances = deepcopy(train_instances_loaded)
                                     val_instances = deepcopy(val_instances_loaded)
                                     test_instances = deepcopy(test_instances_loaded)
@@ -537,10 +551,10 @@ def main():
                                         info_type=info_type,
                                         llm=llm,
                                         abstraction_method=abstraction_method,
-                                        partition_num=partition_num,
+                                        abstraction_state=abstraction_state,
+                                        cluster_method=cluster_method,
                                         pca_dim=pca_dim,
                                         model_type=model_type,
-                                        grid_history_dependency_num=grid_history_dependency_num
                                     )
                         else:
                             train_instances = deepcopy(train_instances_loaded)
@@ -569,10 +583,10 @@ def main():
                                     info_type=info_type,
                                     llm=llm,
                                     abstraction_method=abstraction_method,
-                                    partition_num=partition_num,
+                                    abstraction_state=abstraction_state,
+                                    cluster_method=cluster_method,
                                     pca_dim=pca_dim,
                                     model_type=model_type,
-                                    grid_history_dependency_num=grid_history_dependency_num
                                 )
 
 if __name__ == "__main__":

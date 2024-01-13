@@ -614,11 +614,10 @@ class MetricsAppEvalCollections:
             cluster_centers = (
                 self.abstractStateExtraction.cluster_model.cluster_centers_
             )
-        elif cluster_method == "Birch":
-            cluster_centers = self.abstractStateExtraction.cluster_model.cluster_centers_
         elif cluster_method == "GMM":
             cluster_centers = self.abstractStateExtraction.cluster_model.means_
         else:
+            return 0, 0
             raise ValueError("Unknown cluster method: %s" % cluster_method)
         max_radius = 0
         exceeding_count = 0
