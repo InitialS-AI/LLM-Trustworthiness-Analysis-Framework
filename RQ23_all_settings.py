@@ -10,10 +10,11 @@ from datetime import datetime
 import numpy as np
 from scipy.stats import mannwhitneyu
 import argparse
+from time import time
 
 
 def write_result_to_csv(
-    timestamp, result, settings_str, dataset, extract_block_idx, info_type, llm,
+    timestamp, result, settings_str, dataset, extract_block_idx, info_type, llm, execution_time,
     process_title='rq23_all_settings',
     abstraction_method=None,
     abstraction_state=None,
@@ -44,6 +45,7 @@ def write_result_to_csv(
         "hmm_n_comp": hmm_n_comp,
         "grid_history_dependency_num": grid_history_dependency_num,
         "settings": settings_str,
+        "execution_time": execution_time,
     })
 
     columns_order = [
@@ -57,11 +59,12 @@ def write_result_to_csv(
         "model_type",
         "hmm_n_comp",
         "grid_history_dependency_num",
-        "settings",
+        "execution_time",
         "aucroc",
         "accuracy",
         "f1_score",
         "abnormal_threshold",
+        "settings",
         "preciseness_mean",
         "preciseness_max",
         "entropy_val",
@@ -447,6 +450,7 @@ def main():
                                     train_instances = deepcopy(train_instances_loaded)
                                     val_instances = deepcopy(val_instances_loaded)
                                     test_instances = deepcopy(test_instances_loaded)
+                                    start_time = time()
                                     result, settings_str = run_experiment(
                                         train_instances,
                                         val_instances,
@@ -462,11 +466,13 @@ def main():
                                         hmm_n_comp=hmm_n_comp,
                                         grid_history_dependency_num=grid_history_dependency_num,
                                     )
+                                    execution_time = time() - start_time
                                     print("result", result)
                                     if result:
                                         write_result_to_csv(
                                             timestamp=timestamp,
                                             result=result,
+                                            execution_time=execution_time,
                                             settings_str=settings_str,
                                             dataset=dataset,
                                             extract_block_idx=extract_block_idx,
@@ -484,6 +490,7 @@ def main():
                                 train_instances = deepcopy(train_instances_loaded)
                                 val_instances = deepcopy(val_instances_loaded)
                                 test_instances = deepcopy(test_instances_loaded)
+                                start_time = time()
                                 result, settings_str = run_experiment(
                                     train_instances,
                                     val_instances,
@@ -498,10 +505,12 @@ def main():
                                     extract_block_idx,
                                     grid_history_dependency_num=grid_history_dependency_num,
                                 )
+                                execution_time = time() - start_time
                                 if result:
                                     write_result_to_csv(
                                         timestamp=timestamp,
                                         result=result,
+                                        execution_time=execution_time,
                                         settings_str=settings_str,
                                         dataset=dataset,
                                         extract_block_idx=extract_block_idx,
@@ -527,6 +536,7 @@ def main():
                                 train_instances = deepcopy(train_instances_loaded)
                                 val_instances = deepcopy(val_instances_loaded)
                                 test_instances = deepcopy(test_instances_loaded)
+                                start_time = time()
                                 result, settings_str = run_experiment(
                                     train_instances,
                                     val_instances,
@@ -541,10 +551,12 @@ def main():
                                     extract_block_idx,
                                     hmm_n_comp=hmm_n_comp,
                                 )
+                                execution_time = time() - start_time
                                 if result:
                                     write_result_to_csv(
                                         timestamp=timestamp,
                                         result=result,
+                                        execution_time=execution_time,
                                         settings_str=settings_str,
                                         dataset=dataset,
                                         extract_block_idx=extract_block_idx,
@@ -560,6 +572,7 @@ def main():
                             train_instances = deepcopy(train_instances_loaded)
                             val_instances = deepcopy(val_instances_loaded)
                             test_instances = deepcopy(test_instances_loaded)
+                            start_time = time()
                             result, settings_str = run_experiment(
                                 train_instances,
                                 val_instances,
@@ -573,10 +586,12 @@ def main():
                                 info_type,
                                 extract_block_idx,
                             )
+                            execution_time = time() - start_time
                             if result:
                                 write_result_to_csv(
                                     timestamp=timestamp,
                                     result=result,
+                                    execution_time=execution_time,
                                     settings_str=settings_str,
                                     dataset=dataset,
                                     extract_block_idx=extract_block_idx,
