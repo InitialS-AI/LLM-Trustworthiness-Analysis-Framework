@@ -25,7 +25,7 @@ def main():
     info_type = "hidden_states"
     extract_block_idx = "31"
     abstraction_methods = ["Spectral"]
-    abstract_state_nums = [100, 200, 400, 600]
+    abstract_state_nums = [25, 50, 100, 200, 400, 600]
     pca_dims = [512, 1024, 2048]
     probability_models = ["DTMC"]
     hmm_n_comps = [100, 200, 400]
