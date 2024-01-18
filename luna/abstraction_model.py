@@ -9,10 +9,15 @@ class AbstractModel(object):
         self.clustering = None
     
     def fit_transform(self, train_set, val_set, test_set):
-        self.clustering.fit(train_set)
-        cluster_labels_train = self.clustering.predict(train_set)
-        cluster_labels_val = self.clustering.predict(val_set) if len(val_set) != 0 else []
-        cluster_labels_test = self.clustering.predict(test_set)
+        if hasattr(self.clustering, 'predict'):
+            cluster_labels_train = self.clustering.fit_predict(train_set)
+            cluster_labels_val = self.clustering.fit_predict(val_set) if len(val_set) != 0 else []
+            cluster_labels_test = self.clustering.fit_predict(test_set)
+        else:
+            self.clustering.fit(train_set)
+            cluster_labels_train = self.clustering.predict(train_set)
+            cluster_labels_val = self.clustering.predict(val_set) if len(val_set) != 0 else []
+            cluster_labels_test = self.clustering.predict(test_set)
         print("Training set size: {}".format(len(cluster_labels_train)))
         print("Validation set size: {}".format(len(cluster_labels_val)))
         print("Test set size: {}".format(len(cluster_labels_test)))

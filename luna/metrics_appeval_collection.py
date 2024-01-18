@@ -1130,11 +1130,18 @@ class MetricsAppEvalCollections:
                 np_test_hidden_info_perturb
             )
 
-            cluster_labels_test_perturb = (
-                self.abstractStateExtraction.cluster_model.predict(
-                    pca_test_data_perturb
+            if hasattr(self.abstractStateExtraction.cluster_model, 'predict'):
+                cluster_labels_test_perturb = (
+                    self.abstractStateExtraction.cluster_model.predict(
+                        pca_test_data_perturb
+                    )
                 )
-            )
+            else:
+                cluster_labels_test_perturb = (
+                    self.abstractStateExtraction.cluster_model.fit_predict(
+                        pca_test_data_perturb
+                    )
+                )
             different_count = sum(
                 a != b
                 for a, b in zip(

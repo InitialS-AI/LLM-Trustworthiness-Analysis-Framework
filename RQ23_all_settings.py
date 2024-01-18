@@ -125,9 +125,9 @@ def write_result_to_csv(
     del result["smoothed_perplexity_abstract_model"]
     del result["perplexity_abstract_model"]
 
-    for key, value in result["stationary_distribution_entropy_dict"].items():
-        result[key] = value
-    del result["stationary_distribution_entropy_dict"]
+    # for key, value in result["stationary_distribution_entropy_dict"].items():
+    #     result[key] = value
+    # del result["stationary_distribution_entropy_dict"]
 
     df = pd.DataFrame([result])[columns_order]
 
@@ -236,9 +236,9 @@ def rq3(state_abstract_args, prob_args, train_instances, val_instances, test_ins
     eval_result_dict["sink_state"] = eval_obj.sink_state()
     eval_result_dict["source_state"] = eval_obj.source_state()
     eval_result_dict["recurrent_state"] = eval_obj.recurrent_state()
-    eval_result_dict[
-        "stationary_distribution_entropy_dict"
-    ] = eval_obj.stationary_distribution_entropy()
+    # eval_result_dict[
+    #     "stationary_distribution_entropy_dict"
+    # ] = eval_obj.stationary_distribution_entropy()
     eval_result_dict["perplexity_abstract_model"] = eval_obj.perplexity_abstract_model()
     eval_result_dict[
         "smoothed_perplexity_abstract_model"
