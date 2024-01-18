@@ -19,13 +19,13 @@ def main():
     args = parser.parse_args()
 
     # Experiment settings
-    process_title = "birch"
+    process_title = "minibatch_kmeans"
     llm = args.llm
     dataset = "advglue++"
     info_type = "hidden_states"
     extract_block_idx = "31"
-    abstraction_methods = ["Birch"]
-    abstract_state_nums = [200, 400, 800, 1600, 3200, 6400, 12800, 25600]
+    abstraction_methods = ["MiniBatchKMeans"]
+    abstract_state_nums = [200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200, 102400]
     pca_dims = [512, 1024, 2048]
     probability_models = ["DTMC"]
     hmm_n_comps = [100, 200, 400]

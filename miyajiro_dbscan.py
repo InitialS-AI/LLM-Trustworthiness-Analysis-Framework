@@ -19,13 +19,14 @@ def main():
     args = parser.parse_args()
 
     # Experiment settings
-    process_title = "birch"
+    process_title = "dbscan"
     llm = args.llm
     dataset = "advglue++"
     info_type = "hidden_states"
     extract_block_idx = "31"
-    abstraction_methods = ["Birch"]
-    abstract_state_nums = [200, 400, 800, 1600, 3200, 6400, 12800, 25600]
+    abstraction_methods = ["DBSCAN"]
+    abstract_state_nums = [200, 400, 600]
+    epsilons = [10.0, 1.0, 0.1]
     pca_dims = [512, 1024, 2048]
     probability_models = ["DTMC"]
     hmm_n_comps = [100, 200, 400]
@@ -48,6 +49,7 @@ def main():
         extract_block_idx=extract_block_idx,
         abstraction_methods=abstraction_methods,
         abstract_state_nums=abstract_state_nums,
+        epsilons=epsilons,
         pca_dims=pca_dims,
         probability_models=probability_models,
         hmm_n_comps=hmm_n_comps,

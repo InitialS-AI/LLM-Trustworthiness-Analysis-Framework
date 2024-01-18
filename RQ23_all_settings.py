@@ -3,7 +3,6 @@ import luna.data_loader as data_loader
 
 from types import SimpleNamespace
 import pandas as pd
-from itertools import product
 import os
 from copy import deepcopy
 from datetime import datetime
@@ -12,13 +11,15 @@ from scipy.stats import mannwhitneyu
 import argparse
 from time import time
 
+CLUSTER_METHODS = ["GMM", "KMeans", "Birch"]
+STATE_DEFINABLE_METHODS = ["GMM", "KMeans", "Birch", "Grid"]
+EPSILON_DEFINABLE_METHODS = ["DBSCAN"]
 
 def write_result_to_csv(
     timestamp, result, settings_str, dataset, extract_block_idx, info_type, llm, execution_time,
     process_title='rq23_all_settings',
     abstraction_method=None,
-    abstraction_state=None,
-    cluster_method=None,
+    abstract_state_num=None,
     partition_num=None,
     pca_dim=None,
     epsilon=None,
@@ -36,8 +37,7 @@ def write_result_to_csv(
     result.update({
         "dataset": dataset,
         "abstraction_method": abstraction_method,
-        "abstraction_state": abstraction_state,
-        "cluster_method": cluster_method,
+        "abstract_state_num": abstract_state_num,
         "epsilon": epsilon,
         "partition_num": partition_num,
         "pca_dim": pca_dim,
@@ -52,8 +52,7 @@ def write_result_to_csv(
         "dataset",
         "abstraction_method",
         "partition_num",
-        "abstraction_state",
-        "cluster_method",
+        "abstract_state_num",
         "epsilon",
         "pca_dim",
         "model_type",
@@ -256,6 +255,7 @@ def run_experiment(
     test_instances,
     abstraction_method,
     abstract_state_num,
+    epsilon,
     pca_dim,
     model_type,
     llm,
@@ -275,6 +275,7 @@ def run_experiment(
         "is_attack_success": 1,
         "cluster_method": abstraction_method,
         "abstract_state": abstract_state_num,
+        "epsilon": epsilon,
         "pca_dim": pca_dim,
         "grid_history_dependency_num": grid_history_dependency_num
         if grid_history_dependency_num
@@ -290,6 +291,7 @@ def run_experiment(
         "iter_num": 100,
         "cluster_method": abstraction_method,
         "abstract_state": abstract_state_num,
+        "epsilon": epsilon,
         "pca_dim": pca_dim,
         "model_type": model_type,
         "hmm_components_num": hmm_n_comp if hmm_n_comp else "",
@@ -407,11 +409,9 @@ def main():
     dataset = "advglue++"
     info_type = "hidden_states"
     extract_block_idx = "31"
-    abstraction_methods = ["Grid-based", "Cluster-based"]
+    abstraction_methods = ["Grid", "GMM", "KMeans"]
     partition_nums = [5, 10, 15]
-    abstraction_states = [200, 400, 600]
-    cluster_methods = ["GMM", "KMeans"]
-    # cluster_methods = ["Birch"]
+    abstract_state_nums = [200, 400, 600]
     pca_dims = [512, 1024, 2048]
     grid_pca_dims = [3, 5, 10]
     probability_models = ["DTMC"]
@@ -431,11 +431,11 @@ def main():
     train_instances_loaded, val_instances_loaded, test_instances_loaded = load_data(
         state_abstract_args
     )
-    # Iterate through each abstraction method (Grid-based and Cluster-based)
+    # Iterate through each abstraction method (Grid and Cluster-based)
     for abstraction_method in abstraction_methods:
-        # If Grid-based abstraction method is chosen
-        if abstraction_method == "Grid-based":
-            # Iterate through possible partition numbers for the grid-based method
+        # If Grid abstraction method is chosen
+        if abstraction_method == "Grid":
+            # Iterate through possible partition numbers for the Grid method
             for partition_num in partition_nums: # 5, 10, 15
                 # Explore the impact of different PCA dimensions
                 for pca_dim in grid_pca_dims:  # 3, 5, 10
@@ -452,17 +452,18 @@ def main():
                                     test_instances = deepcopy(test_instances_loaded)
                                     start_time = time()
                                     result, settings_str = run_experiment(
-                                        train_instances,
-                                        val_instances,
-                                        test_instances,
-                                        "Grid",
-                                        partition_num,
-                                        pca_dim,
-                                        model_type,
-                                        llm,
-                                        dataset,
-                                        info_type,
-                                        extract_block_idx,
+                                        train_instances=train_instances,
+                                        val_instances=val_instances,
+                                        test_instances=test_instances,
+                                        abstraction_method=abstraction_method,
+                                        abstract_state_num=partition_num,
+                                        epsilon=0,
+                                        pca_dim=pca_dim,
+                                        model_type=model_type,
+                                        llm=llm,
+                                        dataset=dataset,
+                                        info_type=info_type,
+                                        extract_block_idx=extract_block_idx,
                                         hmm_n_comp=hmm_n_comp,
                                         grid_history_dependency_num=grid_history_dependency_num,
                                     )
@@ -492,17 +493,18 @@ def main():
                                 test_instances = deepcopy(test_instances_loaded)
                                 start_time = time()
                                 result, settings_str = run_experiment(
-                                    train_instances,
-                                    val_instances,
-                                    test_instances,
-                                    "Grid",
-                                    partition_num,
-                                    pca_dim,
-                                    model_type,
-                                    llm,
-                                    dataset,
-                                    info_type,
-                                    extract_block_idx,
+                                    train_instances=train_instances,
+                                    val_instances=val_instances,
+                                    test_instances=test_instances,
+                                    abstraction_method=abstraction_method,
+                                    abstract_state_num=partition_num,
+                                    epsilon=0,
+                                    pca_dim=pca_dim,
+                                    model_type=model_type,
+                                    llm=llm,
+                                    dataset=dataset,
+                                    info_type=info_type,
+                                    extract_block_idx=extract_block_idx,
                                     grid_history_dependency_num=grid_history_dependency_num,
                                 )
                                 execution_time = time() - start_time
@@ -524,11 +526,9 @@ def main():
                                     )
 
         # If Cluster-based abstraction method is chosen
-        elif abstraction_method == "Cluster-based":
+        elif abstraction_method in CLUSTER_METHODS:
             # (similar logic as above for cluster-based experiments)
-            for abstraction_state, cluster_method in product(
-                abstraction_states, cluster_methods
-            ):
+            for abstract_state_num in abstract_state_nums:
                 for pca_dim in pca_dims:
                     for model_type in probability_models:
                         if model_type == "HMM":
@@ -538,17 +538,18 @@ def main():
                                 test_instances = deepcopy(test_instances_loaded)
                                 start_time = time()
                                 result, settings_str = run_experiment(
-                                    train_instances,
-                                    val_instances,
-                                    test_instances,
-                                    cluster_method,
-                                    abstraction_state,
-                                    pca_dim,
-                                    model_type,
-                                    llm,
-                                    dataset,
-                                    info_type,
-                                    extract_block_idx,
+                                    train_instances=train_instances,
+                                    val_instances=val_instances,
+                                    test_instances=test_instances,
+                                    abstraction_method=abstraction_method,
+                                    abstract_state_num=abstract_state_num,
+                                    epsilon=0,
+                                    pca_dim=pca_dim,
+                                    model_type=model_type,
+                                    llm=llm,
+                                    dataset=dataset,
+                                    info_type=info_type,
+                                    extract_block_idx=extract_block_idx,
                                     hmm_n_comp=hmm_n_comp,
                                 )
                                 execution_time = time() - start_time
@@ -563,8 +564,7 @@ def main():
                                         info_type=info_type,
                                         llm=llm,
                                         abstraction_method=abstraction_method,
-                                        abstraction_state=abstraction_state,
-                                        cluster_method=cluster_method,
+                                        abstract_state_num=abstract_state_num,
                                         pca_dim=pca_dim,
                                         model_type=model_type,
                                     )
@@ -574,18 +574,20 @@ def main():
                             test_instances = deepcopy(test_instances_loaded)
                             start_time = time()
                             result, settings_str = run_experiment(
-                                train_instances,
-                                val_instances,
-                                test_instances,
-                                cluster_method,
-                                abstraction_state,
-                                pca_dim,
-                                model_type,
-                                llm,
-                                dataset,
-                                info_type,
-                                extract_block_idx,
+                                train_instances=train_instances,
+                                val_instances=val_instances,
+                                test_instances=test_instances,
+                                abstraction_method=abstraction_method,
+                                abstract_state_num=abstract_state_num,
+                                epsilon=0,
+                                pca_dim=pca_dim,
+                                model_type=model_type,
+                                llm=llm,
+                                dataset=dataset,
+                                info_type=info_type,
+                                extract_block_idx=extract_block_idx,
                             )
+
                             execution_time = time() - start_time
                             if result:
                                 write_result_to_csv(
@@ -598,8 +600,7 @@ def main():
                                     info_type=info_type,
                                     llm=llm,
                                     abstraction_method=abstraction_method,
-                                    abstraction_state=abstraction_state,
-                                    cluster_method=cluster_method,
+                                    abstract_state_num=abstract_state_num,
                                     pca_dim=pca_dim,
                                     model_type=model_type,
                                 )

@@ -1,7 +1,7 @@
 from luna.utils.interfaces import Grid
 import numpy as np
 from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering
+from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering, MiniBatchKMeans as MiniBatchKMeansClustering, MeanShift as MeanShiftClustering, SpectralClustering, AgglomerativeClustering 
 from tqdm import tqdm
 
 class AbstractModel(object):
@@ -32,10 +32,33 @@ class KMeans(AbstractModel):
 
 class Birch(AbstractModel):
     def __init__(self, components):
-        print("Birch")
         super().__init__()
         self.clustering = BirchClustering(n_clusters=components)
 
+class DBSCAN(AbstractModel):
+    def __init__(self, epsilon):
+        super().__init__()
+        self.clustering = DBSCANClustering(eps=epsilon, min_samples=1)
+
+class MiniBatchKMeans(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = MiniBatchKMeansClustering(n_clusters=components)
+
+class MeanShift(AbstractModel):
+    def __init__(self):
+        super().__init__()
+        self.clustering = MeanShiftClustering()
+
+class Spectral(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = SpectralClustering(n_clusters=components)
+
+class Agglomerative(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = AgglomerativeClustering(n_clusters=components)
 
 class RegularGrid(AbstractModel):
     def __init__(self, components, step):

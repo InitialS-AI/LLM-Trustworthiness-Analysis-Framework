@@ -259,9 +259,9 @@ llm = "code_llama_7B_python"  # Language model
 dataset = "humaneval"         # Dataset
 info_type = "hidden_states"
 extract_block_idx = "31"
-abstraction_methods = ["Grid-based", "Cluster-based"]
+abstraction_methods = ["Grid", "Cluster-based"]
 partition_nums = [5, 10, 15]
-abstraction_states = [200, 400, 600]
+abstract_state_nums = [200, 400, 600]
 # ... other configurations
 ```
 
@@ -284,11 +284,11 @@ This command will execute the script with the provided result save path. Ensure 
 
 
 ```python
-# Iterate through each abstraction method (Grid-based and Cluster-based)
+# Iterate through each abstraction method (Grid and Cluster-based)
 for abstraction_method in abstraction_methods:
-    # If Grid-based abstraction method is chosen
-    if abstraction_method == "Grid-based":
-        # Iterate through possible partition numbers for the grid-based method
+    # If Grid abstraction method is chosen
+    if abstraction_method == "Grid":
+        # Iterate through possible partition numbers for the Grid method
         for partition_num in partition_nums:
             # Explore the impact of different PCA dimensions
             for pca_dim in grid_pca_dims:
@@ -336,10 +336,10 @@ for abstraction_method in abstraction_methods:
                                 write_result_to_csv(result, settings_str)
 
     # If Cluster-based abstraction method is chosen
-    elif abstraction_method == "Cluster-based":
+    elif abstraction_method in CLUSTER_METHODS:
         # (similar logic as above for cluster-based experiments)
-        for abstraction_state, cluster_method in product(
-            abstraction_states, cluster_methods
+        for abstract_state_num, cluster_method in product(
+            abstract_state_nums, cluster_methods
         ):
             for pca_dim in pca_dims:
                 for model_type in probability_models:
@@ -353,7 +353,7 @@ for abstraction_method in abstraction_methods:
                                 val_instances,
                                 test_instances,
                                 cluster_method,
-                                abstraction_state,
+                                abstract_state_num,
                                 pca_dim,
                                 model_type,
                                 hmm_n_comp=hmm_n_comp,
@@ -369,7 +369,7 @@ for abstraction_method in abstraction_methods:
                             val_instances,
                             test_instances,
                             cluster_method,
-                            abstraction_state,
+                            abstract_state_num,
                             pca_dim,
                             model_type,
                         )
