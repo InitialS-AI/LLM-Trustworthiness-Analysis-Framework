@@ -1,7 +1,7 @@
 from luna.utils.interfaces import Grid
 import numpy as np
 from sklearn.mixture import GaussianMixture, BayesianGaussianMixture
-from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering, MiniBatchKMeans as MiniBatchKMeansClustering, MeanShift as MeanShiftClustering, SpectralClustering, AgglomerativeClustering 
+from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering, MiniBatchKMeans as MiniBatchKMeansClustering, MeanShift as MeanShiftClustering, SpectralClustering, AgglomerativeClustering, OPTICS as OPTICSClustering
 from tqdm import tqdm
 
 class AbstractModel(object):
@@ -49,6 +49,11 @@ class DBSCAN(AbstractModel):
     def __init__(self, epsilon):
         super().__init__()
         self.clustering = DBSCANClustering(eps=epsilon, min_samples=1)
+
+class OPTICS(AbstractModel):
+    def __init__(self, epsilon):
+        super().__init__()
+        self.clustering = OPTICSClustering(max_eps=epsilon, min_samples=1)
 
 class MiniBatchKMeans(AbstractModel):
     def __init__(self, components):

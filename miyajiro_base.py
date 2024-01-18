@@ -6,9 +6,9 @@ import argparse
 
 from RQ23_all_settings import run_experiment, write_result_to_csv, load_data
 
-CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "MiniBatchKMeans", "MeanShift", "DBSCAN", "Spectral", "Agglomerative"]
+CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "MiniBatchKMeans", "MeanShift", "DBSCAN", "Spectral", "Agglomerative", "OPTICS"]
 STATE_DEFINABLE_CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "Grid", "MiniBatchKMeans", "Spectral", "Agglomerative"]
-EPSILON_DEFINABLE_CLUSTER_METHODS = ["DBSCAN"]
+EPSILON_DEFINABLE_CLUSTER_METHODS = ["DBSCAN", "OPTICS"]
 
 def execute(
     process_title,

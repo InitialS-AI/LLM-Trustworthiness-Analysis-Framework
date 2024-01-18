@@ -1,4 +1,4 @@
-from luna.abstraction_model import GMM, BGM, KMeans, Birch, RegularGrid, DBSCAN, MiniBatchKMeans, MeanShift, Spectral, Agglomerative
+from luna.abstraction_model import GMM, BGM, KMeans, Birch, RegularGrid, DBSCAN, OPTICS, MiniBatchKMeans, MeanShift, Spectral, Agglomerative
 import luna.data_loader as data_loader
 import numpy as np
 from tqdm import tqdm
@@ -115,6 +115,8 @@ class AbstractStateExtraction:
             abstraction_model = Birch(abstract_state)
         elif cluster_method == "DBSCAN":
             abstraction_model = DBSCAN(epsilon)
+        elif cluster_method == "OPTICS":
+            abstraction_model = OPTICS(epsilon)
         elif cluster_method == "MiniBatchKMeans":
             abstraction_model = MiniBatchKMeans(abstract_state)
         elif cluster_method == "MeanShift":
