@@ -1,6 +1,6 @@
 from luna.utils.interfaces import Grid
 import numpy as np
-from sklearn.mixture import GaussianMixture
+from sklearn.mixture import GaussianMixture, BayesianGaussianMixture
 from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering, MiniBatchKMeans as MiniBatchKMeansClustering, MeanShift as MeanShiftClustering, SpectralClustering, AgglomerativeClustering 
 from tqdm import tqdm
 
@@ -29,6 +29,10 @@ class GMM(AbstractModel):
         super().__init__()
         self.clustering = GaussianMixture(n_components=components, covariance_type='diag')
 
+class BGM(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = BayesianGaussianMixture(n_components=components, covariance_type='diag')
 
 class KMeans(AbstractModel):
     def __init__(self, components):

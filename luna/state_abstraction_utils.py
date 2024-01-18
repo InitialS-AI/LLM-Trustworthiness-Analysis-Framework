@@ -1,4 +1,4 @@
-from luna.abstraction_model import GMM, KMeans, Birch, RegularGrid, DBSCAN, MiniBatchKMeans, MeanShift, Spectral, Agglomerative
+from luna.abstraction_model import GMM, BGM, KMeans, Birch, RegularGrid, DBSCAN, MiniBatchKMeans, MeanShift, Spectral, Agglomerative
 import luna.data_loader as data_loader
 import numpy as np
 from tqdm import tqdm
@@ -107,6 +107,8 @@ class AbstractStateExtraction:
         )
         if cluster_method == "GMM":
             abstraction_model = GMM(abstract_state)
+        elif cluster_method == "BGM":
+            abstraction_model = BGM(abstract_state)
         elif cluster_method == "KMeans":
             abstraction_model = KMeans(abstract_state)
         elif cluster_method == "Birch":
