@@ -53,7 +53,7 @@ class DBSCAN(AbstractModel):
 class OPTICS(AbstractModel):
     def __init__(self, epsilon):
         super().__init__()
-        self.clustering = OPTICSClustering(max_eps=epsilon, min_samples=1)
+        self.clustering = OPTICSClustering(max_eps=epsilon)
 
 class MiniBatchKMeans(AbstractModel):
     def __init__(self, components):
