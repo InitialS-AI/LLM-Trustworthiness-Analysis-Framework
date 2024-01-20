@@ -2,6 +2,7 @@ from luna.utils.interfaces import Grid
 import numpy as np
 from sklearn.mixture import GaussianMixture, BayesianGaussianMixture
 from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering, MiniBatchKMeans as MiniBatchKMeansClustering, MeanShift as MeanShiftClustering, SpectralClustering, AgglomerativeClustering, OPTICS as OPTICSClustering
+from sklearn.neighbors import NearestNeighbors
 from tqdm import tqdm
 
 class AbstractModel(object):
@@ -16,8 +17,15 @@ class AbstractModel(object):
             cluster_labels_test = self.clustering.predict(test_set)
         else:
             cluster_labels_train = self.clustering.fit_predict(train_set)
-            cluster_labels_val = self.clustering.fit_predict(val_set) if len(val_set) != 0 else []
-            cluster_labels_test = self.clustering.fit_predict(test_set)
+            if len(val_set) != 0:
+                nearest_neighbors = NearestNeighbors(n_neighbors=1).fit(train_set)
+                _, indices_val = nearest_neighbors.kneighbors(val_set)
+                cluster_labels_val = cluster_labels_train[indices_val.flatten()]
+            else:
+                cluster_labels_val = []
+            nearest_neighbors = NearestNeighbors(n_neighbors=1).fit(train_set)
+            _, indices_test = nearest_neighbors.kneighbors(test_set)
+            cluster_labels_test = cluster_labels_train[indices_test.flatten()]
             
         print("Training set size: {}".format(len(cluster_labels_train)))
         print("Validation set size: {}".format(len(cluster_labels_val)))
