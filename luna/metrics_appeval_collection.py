@@ -7,6 +7,7 @@ from luna.abstraction_model import RegularGrid
 from luna.utils.interfaces import Grid
 
 from sklearn.metrics import pairwise_distances
+from sklearn.neighbors import NearestNeighbors
 import numpy as np
 import statistics
 import random
@@ -1130,11 +1131,12 @@ class MetricsAppEvalCollections:
                 np_test_hidden_info_perturb
             )
 
-            cluster_labels_test_perturb = (
-                self.abstractStateExtraction.cluster_model.predict(
-                    pca_test_data_perturb
-                )
-            )
+            if hasattr(self.abstractStateExtraction.cluster_model, 'predict'):
+                cluster_labels_test_perturb = self.abstractStateExtraction.cluster_model.predict(pca_test_data_perturb)
+            else:
+                nearest_neighbors = NearestNeighbors(n_neighbors=1).fit(self.abstractStateExtraction.pca_train)
+                _, indices_test = nearest_neighbors.kneighbors(pca_test_data_perturb)
+                cluster_labels_test_perturb = self.abstractStateExtraction.cluster_train[indices_test.flatten()]
 
             different_count = sum(
                 a != b
