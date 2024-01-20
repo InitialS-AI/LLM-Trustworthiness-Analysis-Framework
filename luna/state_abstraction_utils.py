@@ -247,6 +247,10 @@ class AbstractStateExtraction:
         self.pca_test = pca_test_data
         print("PCA transform finished!")
 
+        print('------------------')
+        print(self.pca_train[0])
+        print('------------------')
+
         # ========= 4. Get the input trace =========
         print("Clustering...")
         (
@@ -403,6 +407,10 @@ class AbstractStateExtraction:
         self.pca_train = pca_train_data
         self.pca_val = pca_val_data
         self.pca_test = pca_test_data
+
+        print('------------------')
+        print(self.pca_train[0])
+        print('------------------')
 
         # ========= 4. Get the input trace =========
         print("Clustering...")
