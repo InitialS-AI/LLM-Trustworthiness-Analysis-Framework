@@ -25,7 +25,8 @@ def write_result_to_csv(
     epsilon=None,
     model_type=None,
     hmm_n_comp=None,
-    grid_history_dependency_num=None
+    grid_history_dependency_num=None,
+    p_value=None,
 ):
     csv_folder = "eval/{}/{}/{}/{}".format(
         dataset, extract_block_idx, info_type, llm
@@ -46,6 +47,7 @@ def write_result_to_csv(
         "grid_history_dependency_num": grid_history_dependency_num,
         "settings": settings_str,
         "execution_time": execution_time,
+        "p_value": p_value,
     })
 
     columns_order = [
@@ -60,6 +62,7 @@ def write_result_to_csv(
         "grid_history_dependency_num",
         "execution_time",
         "aucroc",
+        "p_value",
         "accuracy",
         "f1_score",
         "abnormal_threshold",
@@ -317,10 +320,8 @@ def run_experiment(
     test_probs = np.array(test_probs)
     val_probs = np.array(val_probs)
     _, p_value = mannwhitneyu(test_probs, val_probs, alternative="two-sided")
-    if p_value < 0.05:
-        return result, settings_str
-    else:
-        return None, None
+
+    return result, settings_str, p_value
 
 
 def load_data(state_abstract_args):

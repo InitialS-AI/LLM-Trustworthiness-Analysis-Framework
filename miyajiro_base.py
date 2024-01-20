@@ -52,7 +52,7 @@ def execute(
                                     val_instances = deepcopy(val_instances_loaded)
                                     test_instances = deepcopy(test_instances_loaded)
                                     start_time = time()
-                                    result, settings_str = run_experiment(
+                                    result, settings_str, p_value = run_experiment(
                                         train_instances=train_instances,
                                         val_instances=val_instances,
                                         test_instances=test_instances,
@@ -86,6 +86,7 @@ def execute(
                                             model_type=model_type,
                                             hmm_n_comp=hmm_n_comp,
                                             grid_history_dependency_num=grid_history_dependency_num,
+                                            p_value=p_value,
                                         )
 
                             else:
@@ -93,7 +94,7 @@ def execute(
                                 val_instances = deepcopy(val_instances_loaded)
                                 test_instances = deepcopy(test_instances_loaded)
                                 start_time = time()
-                                result, settings_str = run_experiment(
+                                result, settings_str, p_value = run_experiment(
                                     train_instances=train_instances,
                                     val_instances=val_instances,
                                     test_instances=test_instances,
@@ -125,6 +126,7 @@ def execute(
                                         pca_dim=pca_dim,
                                         model_type=model_type,
                                         grid_history_dependency_num=grid_history_dependency_num,
+                                        p_value=p_value,
                                     )
 
         # If Cluster-based abstraction method is chosen
@@ -139,7 +141,7 @@ def execute(
                                 val_instances = deepcopy(val_instances_loaded)
                                 test_instances = deepcopy(test_instances_loaded)
                                 start_time = time()
-                                result, settings_str = run_experiment(
+                                result, settings_str, p_value = run_experiment(
                                     train_instances=train_instances,
                                     val_instances=val_instances,
                                     test_instances=test_instances,
@@ -170,13 +172,14 @@ def execute(
                                         abstract_state_num=abstract_state_num,
                                         pca_dim=pca_dim,
                                         model_type=model_type,
+                                        p_value=p_value,
                                     )
                         else:
                             train_instances = deepcopy(train_instances_loaded)
                             val_instances = deepcopy(val_instances_loaded)
                             test_instances = deepcopy(test_instances_loaded)
                             start_time = time()
-                            result, settings_str = run_experiment(
+                            result, settings_str, p_value = run_experiment(
                                 train_instances=train_instances,
                                 val_instances=val_instances,
                                 test_instances=test_instances,
@@ -206,6 +209,7 @@ def execute(
                                     abstract_state_num=abstract_state_num,
                                     pca_dim=pca_dim,
                                     model_type=model_type,
+                                    p_value=p_value,
                                 )
 
 
@@ -220,7 +224,7 @@ def execute(
                                 val_instances = deepcopy(val_instances_loaded)
                                 test_instances = deepcopy(test_instances_loaded)
                                 start_time = time()
-                                result, settings_str = run_experiment(
+                                result, settings_str, p_value = run_experiment(
                                     train_instances=train_instances,
                                     val_instances=val_instances,
                                     test_instances=test_instances,
@@ -251,13 +255,14 @@ def execute(
                                         epsilon=epsilon,
                                         pca_dim=pca_dim,
                                         model_type=model_type,
+                                        p_value=p_value,
                                     )
                         else:
                             train_instances = deepcopy(train_instances_loaded)
                             val_instances = deepcopy(val_instances_loaded)
                             test_instances = deepcopy(test_instances_loaded)
                             start_time = time()
-                            result, settings_str = run_experiment(
+                            result, settings_str, p_value = run_experiment(
                                 train_instances=train_instances,
                                 val_instances=val_instances,
                                 test_instances=test_instances,
@@ -287,6 +292,7 @@ def execute(
                                     epsilon=epsilon,
                                     pca_dim=pca_dim,
                                     model_type=model_type,
+                                    p_value=p_value,
                                 )
             
         else:
@@ -298,7 +304,7 @@ def execute(
                             val_instances = deepcopy(val_instances_loaded)
                             test_instances = deepcopy(test_instances_loaded)
                             start_time = time()
-                            result, settings_str = run_experiment(
+                            result, settings_str, p_value = run_experiment(
                                 train_instances=train_instances,
                                 val_instances=val_instances,
                                 test_instances=test_instances,
@@ -328,13 +334,14 @@ def execute(
                                     abstraction_method=abstraction_method,
                                     pca_dim=pca_dim,
                                     model_type=model_type,
+                                    p_value=p_value,
                                 )
                     else:
                         train_instances = deepcopy(train_instances_loaded)
                         val_instances = deepcopy(val_instances_loaded)
                         test_instances = deepcopy(test_instances_loaded)
                         start_time = time()
-                        result, settings_str = run_experiment(
+                        result, settings_str, p_value = run_experiment(
                             train_instances=train_instances,
                             val_instances=val_instances,
                             test_instances=test_instances,
@@ -363,6 +370,7 @@ def execute(
                                 abstraction_method=abstraction_method,
                                 pca_dim=pca_dim,
                                 model_type=model_type,
+                                p_value=p_value,
                             )
             
 
