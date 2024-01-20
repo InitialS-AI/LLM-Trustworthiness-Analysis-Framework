@@ -26,8 +26,8 @@ def main():
     extract_block_idx = "31"
     abstraction_methods = ["DBSCAN"]
     abstract_state_nums = [200, 400, 600]
-    epsilons = [0.01, 0.1, 1]
-    pca_dims = [256, 512, 1024]
+    epsilons = [0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
+    pca_dims = [128, 256, 512]
     probability_models = ["DTMC"]
     hmm_n_comps = [100, 200, 400]
     state_abstract_args = {

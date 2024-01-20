@@ -101,36 +101,36 @@ def write_result_to_csv(
     ]
 
     dict_result = {
-        "abstract_model_perplexity_good": result["perplexity_abstract_model"][0],
-        "abstract_model_perplexity_bad": result["perplexity_abstract_model"][1],
-        "abstract_model_smoothed_perplexity_2_good": result[
-            "smoothed_perplexity_abstract_model"
-        ][2][0],
-        "abstract_model_smoothed_perplexity_2_bad": result[
-            "smoothed_perplexity_abstract_model"
-        ][2][1],
-        "abstract_model_smoothed_perplexity_3_good": result[
-            "smoothed_perplexity_abstract_model"
-        ][3][0],
-        "abstract_model_smoothed_perplexity_3_bad": result[
-            "smoothed_perplexity_abstract_model"
-        ][3][1],
-        "abstract_model_smoothed_perplexity_4_good": result[
-            "smoothed_perplexity_abstract_model"
-        ][4][0],
-        "abstract_model_smoothed_perplexity_4_bad": result[
-            "smoothed_perplexity_abstract_model"
-        ][4][1],
+        # "abstract_model_perplexity_good": result["perplexity_abstract_model"][0],
+        # "abstract_model_perplexity_bad": result["perplexity_abstract_model"][1],
+        # "abstract_model_smoothed_perplexity_2_good": result[
+        #     "smoothed_perplexity_abstract_model"
+        # ][2][0],
+        # "abstract_model_smoothed_perplexity_2_bad": result[
+        #     "smoothed_perplexity_abstract_model"
+        # ][2][1],
+        # "abstract_model_smoothed_perplexity_3_good": result[
+        #     "smoothed_perplexity_abstract_model"
+        # ][3][0],
+        # "abstract_model_smoothed_perplexity_3_bad": result[
+        #     "smoothed_perplexity_abstract_model"
+        # ][3][1],
+        # "abstract_model_smoothed_perplexity_4_good": result[
+        #     "smoothed_perplexity_abstract_model"
+        # ][4][0],
+        # "abstract_model_smoothed_perplexity_4_bad": result[
+        #     "smoothed_perplexity_abstract_model"
+        # ][4][1],
         "settings": result["settings"],
     }
     for key, value in dict_result.items():
         result[key] = value
-    del result["smoothed_perplexity_abstract_model"]
-    del result["perplexity_abstract_model"]
+    # del result["smoothed_perplexity_abstract_model"]
+    # del result["perplexity_abstract_model"]
 
-    for key, value in result["stationary_distribution_entropy_dict"].items():
-        result[key] = value
-    del result["stationary_distribution_entropy_dict"]
+    # for key, value in result["stationary_distribution_entropy_dict"].items():
+    #     result[key] = value
+    # del result["stationary_distribution_entropy_dict"]
 
     df = pd.DataFrame([result])[columns_order]
 
@@ -173,79 +173,79 @@ def rq3(state_abstract_args, prob_args, train_instances, val_instances, test_ins
         "abnormal_threshold": abnormal_threshold,
     }
 
-    preciseness = eval_obj.preciseness()
-    entropy = eval_obj.entropy()
-    probabilistic_reasoning = eval_obj.probabilistic_reasoning()
-    value_diversity_instant_level = eval_obj.value_diversity_instant_level()
-    value_diversity_n_gram_level = eval_obj.value_diversity_n_gram_level()
-    derivative_diversity_n_gram_level = eval_obj.derivative_diversity_n_gram_level()
-    second_derivative_diversity_n_gram_level = (
-        eval_obj.second_derivative_diversity_n_gram_level()
-    )
+    # preciseness = eval_obj.preciseness()
+    # entropy = eval_obj.entropy()
+    # probabilistic_reasoning = eval_obj.probabilistic_reasoning()
+    # value_diversity_instant_level = eval_obj.value_diversity_instant_level()
+    # value_diversity_n_gram_level = eval_obj.value_diversity_n_gram_level()
+    # derivative_diversity_n_gram_level = eval_obj.derivative_diversity_n_gram_level()
+    # second_derivative_diversity_n_gram_level = (
+    #     eval_obj.second_derivative_diversity_n_gram_level()
+    # )
 
-    eval_result_dict["transition_matrix_list"] = eval_obj.transition_matrix_list()
+    # eval_result_dict["transition_matrix_list"] = eval_obj.transition_matrix_list()
 
-    eval_result_dict["preciseness_mean"] = preciseness[0]
-    eval_result_dict["preciseness_max"] = preciseness[1]
+    # eval_result_dict["preciseness_mean"] = preciseness[0]
+    # eval_result_dict["preciseness_max"] = preciseness[1]
 
-    eval_result_dict["entropy_val"] = entropy[0]
-    eval_result_dict["entropy_test"] = entropy[1]
+    # eval_result_dict["entropy_val"] = entropy[0]
+    # eval_result_dict["entropy_test"] = entropy[1]
 
-    eval_result_dict["probabilistic_reasoning_divergence"] = probabilistic_reasoning
+    # eval_result_dict["probabilistic_reasoning_divergence"] = probabilistic_reasoning
 
-    eval_result_dict[
-        "value_diversity_instant_level_val"
-    ] = value_diversity_instant_level[0]
-    eval_result_dict[
-        "value_diversity_instant_level_test"
-    ] = value_diversity_instant_level[1]
+    # eval_result_dict[
+    #     "value_diversity_instant_level_val"
+    # ] = value_diversity_instant_level[0]
+    # eval_result_dict[
+    #     "value_diversity_instant_level_test"
+    # ] = value_diversity_instant_level[1]
 
-    eval_result_dict["value_diversity_n_gram_level_val"] = value_diversity_n_gram_level[
-        0
-    ]
-    eval_result_dict[
-        "value_diversity_n_gram_level_test"
-    ] = value_diversity_n_gram_level[1]
+    # eval_result_dict["value_diversity_n_gram_level_val"] = value_diversity_n_gram_level[
+    #     0
+    # ]
+    # eval_result_dict[
+    #     "value_diversity_n_gram_level_test"
+    # ] = value_diversity_n_gram_level[1]
 
-    eval_result_dict[
-        "derivative_diversity_n_gram_level_val_increasing"
-    ] = derivative_diversity_n_gram_level[0]
-    eval_result_dict[
-        "derivative_diversity_n_gram_level_val_decreasing"
-    ] = derivative_diversity_n_gram_level[1]
-    eval_result_dict[
-        "derivative_diversity_n_gram_level_test_increasing"
-    ] = derivative_diversity_n_gram_level[2]
-    eval_result_dict[
-        "derivative_diversity_n_gram_level_test_decreasing"
-    ] = derivative_diversity_n_gram_level[3]
+    # eval_result_dict[
+    #     "derivative_diversity_n_gram_level_val_increasing"
+    # ] = derivative_diversity_n_gram_level[0]
+    # eval_result_dict[
+    #     "derivative_diversity_n_gram_level_val_decreasing"
+    # ] = derivative_diversity_n_gram_level[1]
+    # eval_result_dict[
+    #     "derivative_diversity_n_gram_level_test_increasing"
+    # ] = derivative_diversity_n_gram_level[2]
+    # eval_result_dict[
+    #     "derivative_diversity_n_gram_level_test_decreasing"
+    # ] = derivative_diversity_n_gram_level[3]
 
-    eval_result_dict[
-        "second_derivative_diversity_n_gram_level_val_increasing"
-    ] = second_derivative_diversity_n_gram_level[0]
-    eval_result_dict[
-        "second_derivative_diversity_n_gram_level_val_decreasing"
-    ] = second_derivative_diversity_n_gram_level[1]
-    eval_result_dict[
-        "second_derivative_diversity_n_gram_level_test_increasing"
-    ] = second_derivative_diversity_n_gram_level[2]
-    eval_result_dict[
-        "second_derivative_diversity_n_gram_level_test_decreasing"
-    ] = second_derivative_diversity_n_gram_level[3]
+    # eval_result_dict[
+    #     "second_derivative_diversity_n_gram_level_val_increasing"
+    # ] = second_derivative_diversity_n_gram_level[0]
+    # eval_result_dict[
+    #     "second_derivative_diversity_n_gram_level_val_decreasing"
+    # ] = second_derivative_diversity_n_gram_level[1]
+    # eval_result_dict[
+    #     "second_derivative_diversity_n_gram_level_test_increasing"
+    # ] = second_derivative_diversity_n_gram_level[2]
+    # eval_result_dict[
+    #     "second_derivative_diversity_n_gram_level_test_decreasing"
+    # ] = second_derivative_diversity_n_gram_level[3]
 
-    eval_result_dict["succinctness"] = eval_obj.succinctness()
-    eval_result_dict["coverage"] = eval_obj.state_coverage()
-    eval_result_dict["sensitivity"] = eval_obj.sensitivity()
-    eval_result_dict["sink_state"] = eval_obj.sink_state()
-    eval_result_dict["source_state"] = eval_obj.source_state()
-    eval_result_dict["recurrent_state"] = eval_obj.recurrent_state()
-    eval_result_dict[
-        "stationary_distribution_entropy_dict"
-    ] = eval_obj.stationary_distribution_entropy()
-    eval_result_dict["perplexity_abstract_model"] = eval_obj.perplexity_abstract_model()
-    eval_result_dict[
-        "smoothed_perplexity_abstract_model"
-    ] = eval_obj.smoothed_perplexity_abstract_model()
+    # eval_result_dict["succinctness"] = eval_obj.succinctness()
+    # eval_result_dict["coverage"] = eval_obj.state_coverage()
+    # eval_result_dict["sensitivity"] = eval_obj.sensitivity()
+    # eval_result_dict["sink_state"] = eval_obj.sink_state()
+    # eval_result_dict["source_state"] = eval_obj.source_state()
+    # eval_result_dict["recurrent_state"] = eval_obj.recurrent_state()
+    # eval_result_dict[
+    #     "stationary_distribution_entropy_dict"
+    # ] = eval_obj.stationary_distribution_entropy()
+    # eval_result_dict["perplexity_abstract_model"] = eval_obj.perplexity_abstract_model()
+    # eval_result_dict[
+    #     "smoothed_perplexity_abstract_model"
+    # ] = eval_obj.smoothed_perplexity_abstract_model()
 
     eval_result_dict["transition_matrix_list"] = eval_obj.transition_matrix_list()
 

@@ -25,7 +25,7 @@ def main():
     info_type = "hidden_states"
     extract_block_idx = "31"
     abstraction_methods = ["Agglomerative"]
-    abstract_state_nums = [100, 200, 400, 800, 1600, 3200, 6400, 12800, 25600, 51200]
+    abstract_state_nums = [400, 800, 1600, 3200, 6400, 12800, 25600, 51200]
     pca_dims = [512, 1024, 2048]
     probability_models = ["DTMC"]
     hmm_n_comps = [100, 200, 400]
