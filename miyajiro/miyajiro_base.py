@@ -4,7 +4,7 @@ from copy import deepcopy
 from datetime import datetime
 import argparse
 
-from RQ23_all_settings import run_experiment, write_result_to_csv, load_data
+from ..RQ23_all_settings import run_experiment, write_result_to_csv, load_data
 
 CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "MiniBatchKMeans", "MeanShift", "DBSCAN", "Spectral", "Agglomerative", "OPTICS"]
 STATE_DEFINABLE_CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "Grid", "MiniBatchKMeans", "Spectral", "Agglomerative"]
@@ -393,9 +393,9 @@ def main():
     dataset = "advglue++"
     info_type = "hidden_states"
     extract_block_idx = "31"
-    abstraction_methods = ["Grid", "GMM", "KMeans", "Birch"]
+    abstraction_methods = ["Grid", "GMM", "KMeans"]
     partition_nums = [5, 10, 15]
-    abstract_state_nums = [200, 400, 600]
+    abstract_state_nums = [200, 400, 800]
     pca_dims = [512, 1024, 2048]
     grid_pca_dims = [3, 5, 10]
     probability_models = ["DTMC"]

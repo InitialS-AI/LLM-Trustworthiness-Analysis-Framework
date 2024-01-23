@@ -1,0 +1,5 @@
+dataset,abstraction_method,partition_num,abstract_state_num,epsilon,pca_dim,model_type,hmm_n_comp,grid_history_dependency_num,execution_time,aucroc,p_value,accuracy,f1_score,abnormal_threshold,settings
+advglue++,MeanShift,,,,256,DTMC,,,9127.201687812805,0.5,1.0,0.2536135201245275,0.4046119733924612,1.0,MeanShift_0_256_DTMC_0_0
+advglue++,MeanShift,,,,512,DTMC,,,15394.84412074089,0.5,1.0,0.2536135201245275,0.4046119733924612,1.0,MeanShift_0_512_DTMC_0_0
+advglue++,MeanShift,,,,1024,DTMC,,,28798.168653011322,0.5495444103202166,0.5001842570707944,0.25394707582833,0.4047196593328602,0.9999162642699639,MeanShift_0_1024_DTMC_0_0
+advglue++,MeanShift,,,,2048,DTMC,,,55222.88613009453,0.5495444103202166,0.5001842570707944,0.5416944629753169,0.3807091346153847,0.9999162642699638,MeanShift_0_2048_DTMC_0_0
