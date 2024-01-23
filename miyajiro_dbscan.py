@@ -27,7 +27,7 @@ def main():
     abstraction_methods = ["DBSCAN"]
     abstract_state_nums = [200, 400, 600]
     epsilons = [1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 1]
-    pca_dims = [8, 16, 32, 64, 128, 256, 512, 1024]
+    pca_dims = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
     probability_models = ["DTMC"]
     hmm_n_comps = [100, 200, 400]
     state_abstract_args = {

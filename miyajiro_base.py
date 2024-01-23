@@ -4,7 +4,7 @@ from copy import deepcopy
 from datetime import datetime
 import argparse
 
-from ..RQ23_all_settings import run_experiment, write_result_to_csv, load_data
+from RQ23_all_settings import run_experiment, write_result_to_csv, load_data
 
 CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "MiniBatchKMeans", "MeanShift", "DBSCAN", "Spectral", "Agglomerative", "OPTICS"]
 STATE_DEFINABLE_CLUSTER_METHODS = ["GMM", "BGM", "KMeans", "Birch", "Grid", "MiniBatchKMeans", "Spectral", "Agglomerative"]
