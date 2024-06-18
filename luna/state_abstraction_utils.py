@@ -1,4 +1,4 @@
-from luna.abstraction_model import GMM, KMeans, RegularGrid
+from luna.abstraction_model import GMM, BGM, KMeans, Birch, RegularGrid, DBSCAN, OPTICS, MiniBatchKMeans, MeanShift, Spectral, Agglomerative
 import luna.data_loader as data_loader
 import numpy as np
 from tqdm import tqdm
@@ -68,6 +68,7 @@ class AbstractStateExtraction:
         test_set,
         abstract_state,
         grid_history_dependency_num,
+        epsilon,
     ):
         """
         Obtain cluster labels for the given data sets using PCA and a specified clustering method.
@@ -79,6 +80,7 @@ class AbstractStateExtraction:
             test_set (list): The test data set.
             abstract_state (int): The number of abstract states.
             grid_history_dependency_num (int): The number of history dependencies for the grid clustering method.
+            epsilon (float): The epsilon value for clustering like DBSCAN.
             
         Attributes:
             cluster_train: Cluster labels for the training data.
@@ -105,10 +107,26 @@ class AbstractStateExtraction:
         )
         if cluster_method == "GMM":
             abstraction_model = GMM(abstract_state)
+        elif cluster_method == "BGM":
+            abstraction_model = BGM(abstract_state)
         elif cluster_method == "KMeans":
             abstraction_model = KMeans(abstract_state)
+        elif cluster_method == "Birch":
+            abstraction_model = Birch(abstract_state)
+        elif cluster_method == "DBSCAN":
+            abstraction_model = DBSCAN(epsilon)
+        elif cluster_method == "OPTICS":
+            abstraction_model = OPTICS(epsilon)
+        elif cluster_method == "MiniBatchKMeans":
+            abstraction_model = MiniBatchKMeans(abstract_state)
+        elif cluster_method == "MeanShift":
+            abstraction_model = MeanShift()
         elif cluster_method == "Grid":
             abstraction_model = RegularGrid(abstract_state, grid_history_dependency_num)
+        elif cluster_method == "Spectral":
+            abstraction_model = Spectral(abstract_state)
+        elif cluster_method == "Agglomerative":
+            abstraction_model = Agglomerative(abstract_state)
         else:
             raise NotImplementedError("Unknown clustering method!")
 
@@ -139,6 +157,7 @@ class AbstractStateExtraction:
         cluster_method,
         abstract_state,
         grid_history_dependency_num,
+        epsilon,
     ):
         """
         Obtain state traces from hidden states using PCA and a specified clustering method.
@@ -154,6 +173,7 @@ class AbstractStateExtraction:
             cluster_method (str): The clustering method to be used. Options are "GMM", "KMeans", and "Grid".
             abstract_state (int): The number of abstract states.
             grid_history_dependency_num (int): The number of history dependencies for the grid clustering method.
+            epsilon (float): The epsilon value for clustering like DBSCAN.
             
         Attributes:
             train_hidden_info: Hidden state information for the training data.
@@ -227,6 +247,10 @@ class AbstractStateExtraction:
         self.pca_test = pca_test_data
         print("PCA transform finished!")
 
+        print('------------------')
+        print(self.pca_train[0])
+        print('------------------')
+
         # ========= 4. Get the input trace =========
         print("Clustering...")
         (
@@ -240,6 +264,7 @@ class AbstractStateExtraction:
             pca_test_data,
             abstract_state,
             grid_history_dependency_num,
+            epsilon,
         )
         print("Clustering finished!")
 
@@ -311,6 +336,7 @@ class AbstractStateExtraction:
         cluster_method,
         abstract_state,
         grid_history_dependency_num,
+        epsilon,
     ):
         """
         Obtain state traces from attention values using PCA and a specified clustering method.
@@ -326,6 +352,7 @@ class AbstractStateExtraction:
             cluster_method (str): The clustering method to be used. Options are "GMM", "KMeans", and "Grid".
             abstract_state (int): The number of abstract states.
             grid_history_dependency_num (int): The number of history dependencies for the grid clustering method.
+            epsilon (float): The epsilon value for clustering like DBSCAN.
             
         Attributes:
             train_hidden_info: Attention information for the training data.
@@ -381,6 +408,10 @@ class AbstractStateExtraction:
         self.pca_val = pca_val_data
         self.pca_test = pca_test_data
 
+        print('------------------')
+        print(self.pca_train[0])
+        print('------------------')
+
         # ========= 4. Get the input trace =========
         print("Clustering...")
         (
@@ -394,6 +425,7 @@ class AbstractStateExtraction:
             pca_test_data,
             abstract_state,
             grid_history_dependency_num,
+            epsilon,
         )
         print("Clustering finished!")
 
@@ -477,6 +509,7 @@ class AbstractStateExtraction:
         test_ratio = args.test_ratio
         is_attack_success = args.is_attack_success
         grid_history_dependency_num = args.grid_history_dependency_num
+        epsilon = args.epsilon
 
         # set the dataset folder path
         dataset_folder_path = "{}/{}/{}".format(
@@ -506,6 +539,7 @@ class AbstractStateExtraction:
                     cluster_method,
                     abstract_state,
                     grid_history_dependency_num,
+                    epsilon,
                 )
             elif info_type == "attention_heads" or info_type == "attention_blocks":
                 (
@@ -520,6 +554,7 @@ class AbstractStateExtraction:
                     cluster_method,
                     abstract_state,
                     grid_history_dependency_num,
+                    epsilon,
                 )
             else:
                 raise NotImplementedError("Unknown info type!")
@@ -563,7 +598,8 @@ class AbstractStateExtraction:
                     pca_dim,
                     cluster_method,
                     abstract_state,
-                    grid_history_dependency_num
+                    grid_history_dependency_num,
+                    epsilon,
                 )
 
             elif info_type == "attention_heads" or info_type == "attention_blocks":
@@ -595,7 +631,8 @@ class AbstractStateExtraction:
                     pca_dim,
                     cluster_method,
                     abstract_state,
-                    grid_history_dependency_num
+                    grid_history_dependency_num,
+                    epsilon,
                 )
             else:
                 raise NotImplementedError("Unknown info type!")

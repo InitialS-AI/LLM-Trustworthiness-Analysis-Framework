@@ -1,0 +1,2 @@
+dataset,abstraction_method,partition_num,abstract_state_num,epsilon,pca_dim,model_type,hmm_n_comp,grid_history_dependency_num,execution_time,aucroc,p_value,accuracy,f1_score,abnormal_threshold,settings
+advglue++,DBSCAN,,,1e-05,128,DTMC,,,83.43711805343628,0.8074803069129872,7.002687776393447e-284,0.30598176562152546,0.16282188841201717,0.1,DBSCAN_0_128_DTMC_0_0

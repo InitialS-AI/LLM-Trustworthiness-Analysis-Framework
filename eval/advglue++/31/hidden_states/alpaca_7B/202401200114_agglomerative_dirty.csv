@@ -1,0 +1,2 @@
+dataset,abstraction_method,partition_num,abstract_state_num,epsilon,pca_dim,model_type,hmm_n_comp,grid_history_dependency_num,execution_time,aucroc,p_value,accuracy,f1_score,abnormal_threshold,settings
+advglue++,Agglomerative,,800,,1024,DTMC,,,5604.882750034332,0.5934136641181142,1.3612730681732779e-18,0.44207249277295974,0.3107142857142857,0.4811571705511099,Agglomerative_800_1024_DTMC_0_0

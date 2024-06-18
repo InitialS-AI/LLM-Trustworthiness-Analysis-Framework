@@ -1,7 +1,8 @@
 from luna.utils.interfaces import Grid
 import numpy as np
-from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans as KMeansClustering
+from sklearn.mixture import GaussianMixture, BayesianGaussianMixture
+from sklearn.cluster import KMeans as KMeansClustering, Birch as BirchClustering, DBSCAN as DBSCANClustering, MiniBatchKMeans as MiniBatchKMeansClustering, MeanShift as MeanShiftClustering, SpectralClustering, AgglomerativeClustering, OPTICS as OPTICSClustering
+from sklearn.neighbors import NearestNeighbors
 from tqdm import tqdm
 
 class AbstractModel(object):
@@ -9,10 +10,23 @@ class AbstractModel(object):
         self.clustering = None
     
     def fit_transform(self, train_set, val_set, test_set):
-        self.clustering.fit(train_set)
-        cluster_labels_train = self.clustering.predict(train_set)
-        cluster_labels_val = self.clustering.predict(val_set) if len(val_set) != 0 else []
-        cluster_labels_test = self.clustering.predict(test_set)
+        if hasattr(self.clustering, 'predict'):
+            self.clustering.fit(train_set)
+            cluster_labels_train = self.clustering.predict(train_set)
+            cluster_labels_val = self.clustering.predict(val_set) if len(val_set) != 0 else []
+            cluster_labels_test = self.clustering.predict(test_set)
+        else:
+            cluster_labels_train = self.clustering.fit_predict(train_set)
+            if len(val_set) != 0:
+                nearest_neighbors = NearestNeighbors(n_neighbors=1).fit(train_set)
+                _, indices_val = nearest_neighbors.kneighbors(val_set)
+                cluster_labels_val = cluster_labels_train[indices_val.flatten()]
+            else:
+                cluster_labels_val = []
+            nearest_neighbors = NearestNeighbors(n_neighbors=1).fit(train_set)
+            _, indices_test = nearest_neighbors.kneighbors(test_set)
+            cluster_labels_test = cluster_labels_train[indices_test.flatten()]
+            
         print("Training set size: {}".format(len(cluster_labels_train)))
         print("Validation set size: {}".format(len(cluster_labels_val)))
         print("Test set size: {}".format(len(cluster_labels_test)))
@@ -23,12 +37,51 @@ class GMM(AbstractModel):
         super().__init__()
         self.clustering = GaussianMixture(n_components=components, covariance_type='diag')
 
+class BGM(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = BayesianGaussianMixture(n_components=components, covariance_type='diag')
 
 class KMeans(AbstractModel):
     def __init__(self, components):
         super().__init__()
         self.clustering = KMeansClustering(components)
 
+
+class Birch(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = BirchClustering(n_clusters=components)
+
+class DBSCAN(AbstractModel):
+    def __init__(self, epsilon):
+        super().__init__()
+        self.clustering = DBSCANClustering(eps=epsilon, min_samples=1)
+
+class OPTICS(AbstractModel):
+    def __init__(self, epsilon):
+        super().__init__()
+        self.clustering = OPTICSClustering(max_eps=epsilon)
+
+class MiniBatchKMeans(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = MiniBatchKMeansClustering(n_clusters=components)
+
+class MeanShift(AbstractModel):
+    def __init__(self):
+        super().__init__()
+        self.clustering = MeanShiftClustering()
+
+class Spectral(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = SpectralClustering(n_clusters=components)
+
+class Agglomerative(AbstractModel):
+    def __init__(self, components):
+        super().__init__()
+        self.clustering = AgglomerativeClustering(n_clusters=components)
 
 class RegularGrid(AbstractModel):
     def __init__(self, components, step):

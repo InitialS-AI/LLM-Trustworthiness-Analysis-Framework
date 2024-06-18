@@ -1,3 +1,8 @@
+nohup.out
+outputs
+outputs_copy
+outputs_2401121414
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 # *.py[cod]
