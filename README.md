@@ -401,6 +401,6 @@ This detailed example provides a clear guide on how to set up and run a comprehe
 
 ## License
 
-[FPA](LICENSE)
+[GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/) 
 
 ---
